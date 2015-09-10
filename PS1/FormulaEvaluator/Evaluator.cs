@@ -46,8 +46,8 @@ namespace FormulaEvaluator
                     continue;
 
                 // Try to read an integer
-                int num;
-                if (Int32.TryParse(s, out num))
+                double num;
+                if (Double.TryParse(s, out num))
                 {
                     if (opStack.Count > 0)
                     {
