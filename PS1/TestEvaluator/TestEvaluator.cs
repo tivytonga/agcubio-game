@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TestEvaluator
 {
-    class Tester
+    class TestEvaluator
     {
         static void Main(string[] args)
         {
@@ -27,13 +27,14 @@ namespace TestEvaluator
             expressions.Add("(2*x*x*x-x)/(y*x+y)");
             expressions.Add("");
             expressions.Add("5+[6]");
+            expressions.Add("3x");
 
             foreach (string exp in expressions)
             {
                 Console.Write(exp + " = ");
                 try
                 {
-                    Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate(exp, variableEvaluator));
+                    Console.WriteLine(FormulaEvaluator.FormulaEvaluator.Evaluate(exp, variableEvaluator));
                 }
                 catch (ArgumentException)
                 {
