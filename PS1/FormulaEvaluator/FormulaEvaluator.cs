@@ -16,7 +16,7 @@ namespace FormulaEvaluator
     /// followed by 1+ digits. Whitespace is ignored. Uses double arithmetic before
     /// truncating the final result.
     /// </summary>
-    public static class FormulaEvaluator
+    public static class Evaluator
     {
         /// <summary>
         /// Should take a given string (variable) and return an int value for it.
@@ -233,7 +233,8 @@ namespace FormulaEvaluator
             {
                 testIndex++;
                 if (testIndex == name.Length)
-                    return true;
+                    // Only letters
+                    return false;
             }
 
             if (testIndex == 0)

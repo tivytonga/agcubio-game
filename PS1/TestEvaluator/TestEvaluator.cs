@@ -28,13 +28,14 @@ namespace TestEvaluator
             expressions.Add("");
             expressions.Add("5+[6]");
             expressions.Add("3x");
+            expressions.Add("xx");
 
             foreach (string exp in expressions)
             {
                 Console.Write(exp + " = ");
                 try
                 {
-                    Console.WriteLine(FormulaEvaluator.FormulaEvaluator.Evaluate(exp, variableEvaluator));
+                    Console.WriteLine(FormulaEvaluator.Evaluator.Evaluate(exp, variableEvaluator));
                 }
                 catch (ArgumentException)
                 {
@@ -53,6 +54,7 @@ namespace TestEvaluator
             map.Add("A2", 10);
             map.Add("x", -2);
             map.Add("y", 3);
+            map.Add("xx", 0);
 
             return map[v];
         }
