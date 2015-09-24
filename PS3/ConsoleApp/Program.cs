@@ -12,42 +12,28 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            List<string> l = new List<string>();
-            l.Add("1");
-            l.Add("2");
-            l.Add("3");
-            
-            IEnumerable<string> ie = l.AsReadOnly();
-            List<string> newl = (List<string>)ie;
-            newl.Add("d");
-
-            foreach (string k in l)
+            Formula f1 = null;
+            Formula f2 = null;
+            Console.WriteLine(f1 == f2);
+            Console.WriteLine(f2 == f1);
+            Console.WriteLine(f1 != f2);
+            Console.WriteLine(f2 != f1);
+            /*string s = "2 2.0 2e3 2.0e3";
+            foreach (string token in GetTokens(s))
             {
-                Console.WriteLine(k);
-            }
-            Console.Read();
-
-
-            string a = "a";
-            string a2 = "a";
-            Console.WriteLine(a == a2);
-            Console.Read();
-
-            string formula = "(x+x_y - 4.0000 * y1) - 03x_d3d __a \n 3+3 - 4x";
-            foreach (string s in GetTokens(formula))
-            {
-                Console.WriteLine(s);
-            }
+                Console.WriteLine(token);
+                Console.WriteLine(IsNumber(token));
+            }*/
             Console.Read();
         }
 
-        /// <summary>
-        /// ( ) + - * /
-        /// Given an expression, enumerates the tokens that compose it.  Tokens are left paren;
-        /// right paren; one of the four operator symbols; a string consisting of a letter or underscore
-        /// followed by zero or more letters, digits, or underscores; a double literal; and anything that doesn't
-        /// match one of those patterns.  There are no empty tokens, and no token contains white space.
-        /// </summary>
+        public static bool IsNumber(string s)
+        {
+            //return Regex.IsMatch(s, @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?");
+            double d;
+            return Double.TryParse(s, out d);
+        }
+
         private static IEnumerable<string> GetTokens(String formula)
         {
             // Patterns for individual tokens
@@ -71,11 +57,6 @@ namespace ConsoleApp
                 }
             }
 
-        }
-
-        public static String foo(object obj)
-        {
-            return obj.GetType().ToString();
         }
     }
 }

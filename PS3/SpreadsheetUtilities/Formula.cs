@@ -69,12 +69,109 @@ namespace SpreadsheetUtilities
         /// </summary>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
+            expression = "";
+            variables = new List<string>();
+
+            int numRightParens = 0;
+            int numLeftParens = 0;
+            string previousToken = "";
 
             foreach (string token in GetTokens(formula))
             {
+                if (expression == "")
+                {
+                    if (!(token.IsNumber() || token.IsLeftParen() || token.IsVariable()))
+                    {
+                        throw new FormulaFormatException("First token "+token+" is invalid. Must start with a number, left parenthesis, or variable.");
+                    }
+                }
+
+                if (previousToken.IsLeftParen() || previousToken.IsOperator()) {
+                    if (!(token.IsNumber() || token.IsVariable() || token.IsLeftParen())) {
+                        throw new FormulaFormatException("Read token " + previousToken + " . Expected a number, variable, or left parenthesis to follow, but instead found: " + token);
+                    }
+                }
+
+                if (previousToken.IsNumber() || previousToken.IsVariable() || previousToken.IsRightParen())
+                {
+                    if (!(token.IsOperator() || token.IsRightParen())) {
+                        throw new FormulaFormatException("Read token " + previousToken + " . Expected an operator or right parenthesis to follow, but instead found: " + token);
+                    }
+                }
+
+                if (token.IsRightParen())
+                {
+                    numRightParens++;
+                    if (numRightParens > numLeftParens)
+                    {
+                        throw new FormulaFormatException("Too many close parenthesis.");
+                    }
+                    expression += token;
+                }
+
+                else if (token.IsLeftParen())
+                {
+                    numLeftParens++;
+                    expression += token;
+                }
+
+                else if (token.IsOperator())
+                {
+                    expression += token;
+                }
+
+                else if (token.IsNumber())
+                {
+                    double d;
+                    Double.TryParse(token, out d);
+                    expression += d;
+                }
+
+                else if (token.IsVariable())
+                {
+                    string var;
+                    try
+                    {
+                        var = normalize(token);
+                    }
+                    catch
+                    {
+                        throw new FormulaFormatException("Token " + token + "could not be normalized.");
+                    }
+                    if (!isValid(var))
+                    {
+                        throw new FormulaFormatException("Token " + token + " (normalized: " + var + " ) is not valid.");
+                    }
+                    expression += var;
+                    
+                    // If variable unique, add to list
+                    if (!variables.Contains(var))
+                    {
+                        variables.Add(var);
+                    }
+                }
+
+                else
+                {
+                    throw new FormulaFormatException("Unrecognized token: " + token);
+                }
+
+                previousToken = token;
+            }
 
 
-                //if variable and not seen before, add to variabls list 
+            if (expression == "")
+                throw new FormulaFormatException("Formula contains no valid tokens.");
+
+            if (!(previousToken.IsNumber() || previousToken.IsVariable() || previousToken.IsRightParen()))
+            {
+                // Must end with number, variable, or closing parenthesis
+                throw new FormulaFormatException("Final token "+previousToken+" is invalid. Must end with a number, right parenthesis, or variable.");
+            }
+
+            if (numRightParens < numLeftParens)
+            {
+                throw new FormulaFormatException("Too many open parenthesis.");
             }
         }
 
@@ -101,7 +198,157 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
-            return null;
+            ////copied
+            //todo: make work
+            Stack<string> opStack = new Stack<string>();
+            Stack<double> valStack = new Stack<double>();
+            foreach (string token in GetTokens(expression))
+            {
+                // Try to read a double
+                double num;
+                if (Double.TryParse(token, out num))
+                {
+                    if (opStack.Count > 0)
+                    {
+                        string op = opStack.Peek();
+                        if (op.Equals("*") || op.Equals("/"))
+                        {
+                            opStack.Pop();
+                            double leftValue = valStack.Pop();
+                            valStack.Push(applyOperation(op, leftValue, num));
+                        }
+                        else
+                            valStack.Push(num);
+                    }
+                    else
+                        valStack.Push(num);
+                    continue;
+                }
+
+                // Try to read + or -
+                if (token.Equals("+") || token.Equals("-"))
+                {
+                    if (opStack.Count > 0)
+                    {
+                        string op = opStack.Peek();
+                        if (op.Equals("+") || op.Equals("-"))
+                        {
+                            opStack.Pop();
+                            double rightValue = valStack.Pop();
+                            double leftValue = valStack.Pop();
+                            valStack.Push(applyOperation(op, leftValue, rightValue));
+                        }
+                    }
+
+                    opStack.Push(token);
+                    continue;
+                }
+
+                // Try to read *, /, (
+                if (token.Equals("*") || token.Equals("/") || token.Equals("("))
+                {
+                    opStack.Push(token);
+                    continue;
+                }
+
+                // Try to read )
+                if (token.Equals(")"))
+                {
+                    string op;
+                    if (opStack.Count > 0)
+                    {
+                        op = opStack.Peek();
+                        if (op.Equals("+") || op.Equals("-"))
+                        {
+                            opStack.Pop();
+                            double rightValue = valStack.Pop();
+                            double leftValue = valStack.Pop();
+                            valStack.Push(applyOperation(op, leftValue, rightValue));
+                        }
+                    }
+
+                    op = opStack.Pop();
+
+                    if (opStack.Count > 0)
+                    {
+                        op = opStack.Peek();
+                        if (op.Equals("*") || op.Equals("/"))
+                        {
+                            opStack.Pop();
+                            double rightValue = valStack.Pop();
+                            double leftValue = valStack.Pop();
+                            valStack.Push(applyOperation(op, leftValue, rightValue));
+                        }
+                    }
+
+                    continue;
+                }
+
+                // Try to read a variable
+                else
+                {
+                    try
+                    {
+                        num = lookup(token);
+                    }
+                    catch
+                    {
+                        return new FormulaError("Variable " + token + " not found.");
+                    }
+
+                    if (opStack.Count > 0)
+                    {
+                        string op = opStack.Peek();
+                        if (op.Equals("*") || op.Equals("/"))
+                        {
+                            opStack.Pop();
+                            double leftValue = valStack.Pop();
+                            valStack.Push(applyOperation(op, leftValue, num));
+                        }
+                        else
+                            valStack.Push(num);
+                    }
+                    else
+                        valStack.Push(num);
+                    continue;
+                }
+            }
+            
+            if (opStack.Count == 1 && valStack.Count == 2)
+            {
+                double valRight = valStack.Pop();
+                double valLeft = valStack.Pop();
+                string op = opStack.Pop();
+                return applyOperation(op, valLeft, valRight);
+            }
+
+            return valStack.Pop();
+        }
+
+        /// <summary>
+        /// Applies the give operation (+, -, *, /) to the given parameters.
+        /// Throws ArgumentException if divides by 0 or invalid operation.
+        /// </summary>
+        /// <param name="op"></param>
+        /// <param name="leftValue"></param>
+        /// <param name="rightValue"></param>
+        /// <returns></returns>
+        private static double applyOperation(string op, double leftValue, double rightValue)
+        {
+            if (op.Equals("+"))
+                return leftValue + rightValue;
+            if (op.Equals("-"))
+                return leftValue - rightValue;
+            if (op.Equals("*"))
+                return leftValue * rightValue;
+            if (op.Equals("/"))
+            {
+                if (rightValue.Equals(0))
+                    throw new ArgumentException("Division by 0.");
+                return leftValue / rightValue;
+            }
+
+            throw new ArgumentException();
         }
 
         /// <summary>
@@ -168,9 +415,10 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator ==(Formula f1, Formula f2)
         {
-            if (f1 == null && f2 == null)
+
+            if ((object)f1 == null && (object)f2 == null)
                 return true;
-            if (f1 == null || f2 == null)
+            if ((object)f1 == null || (object)f2 == null)
                 return false;
             return f1.Equals(f2);
         }
@@ -226,7 +474,64 @@ namespace SpreadsheetUtilities
             }
 
         }
+
     }
+
+    /// <summary>
+    /// Extensions to String class to make symbol comparing a bit easier.
+    /// </summary>
+    static class StringExtensions
+    {
+        /// <summary>
+        /// Returns true if the string is a double literal.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsNumber(this string s)
+        {
+            //return Regex.IsMatch(s, @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?");
+            double d;
+            return Double.TryParse(s, out d);
+        }
+
+        /// <summary>
+        /// Returns true if the string is a left parenthesis.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsLeftParen(this string s)
+        {
+            return s == "(";
+        }
+
+        /// <summary>
+        /// Returns true if the string is a right parenthesis.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsRightParen(this string s)
+        {
+            return s == ")";
+        }
+
+        /// <summary>
+        /// Returns true if a string matches the variable pattern:
+        /// consists of a letter or underscore followed by 
+        /// zero or more letters, underscores, or digits.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsVariable(this string s)
+        {
+            return Regex.IsMatch(s, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*");
+        }
+
+        /// <summary>
+        /// Returns true if a string is an operator * / + -
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsOperator(this string s)
+        {
+            return Regex.IsMatch(s, @"[\+\-*/]");
+        }
+    }
+
 
     /// <summary>
     /// Used to report syntactic errors in the argument to the Formula constructor.
