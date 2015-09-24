@@ -1,30 +1,69 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetUtilities;
+using System.Collections.Generic;
 
 namespace UnitTestProject1
 {
     [TestClass]
     public class FormulaTester
     {
+
+        //////// Tests on GetVariables ////////////
+        
+        /// <summary>
+        /// Test GetVariables contains only the normalized variables.
+        /// </summary>
+        [TestMethod]
+        public void publicTestGetVariables1()
+        {
+            List<string> norm = new List<string> {"A", "C4", "G"};
+            Formula f = new Formula("a+5e4+G+c4", s => s.ToUpper(), s => true);
+            foreach (string var in f.GetVariables())
+            {
+                Assert.IsTrue(norm.Contains(var));
+            }
+        }
+
+        /// <summary>
+        /// Test GetVariables contains only one of each variable.
+        /// </summary>
+        [TestMethod]
+        public void publicTestGetVariables2()
+        {
+            HashSet<string> expected = new HashSet<string> { "A", "C", "G" };
+            Formula f = new Formula("a+ 5e4+G+c/ (A*2-C*g)+3.0", s => s.ToUpper(), s => true);
+            
+            int count = 0;
+            foreach (string var in f.GetVariables())
+            {
+                Assert.IsTrue(expected.Contains(var));
+                count++;
+            }
+            Assert.AreEqual(expected.Count, count);
+        }
+
         ///////// Tests on ToString ///////////
         
         /// <summary>
-        /// Test ToString returns a normalized result.
+        /// Test ToString returns a normalized result without whitespace.
         /// </summary>
         [TestMethod]
         public void publicTestToString1()
         {
-            Formula f1 = new Formula("x+y", s => s.ToUpper(), s => true);
+            Formula f1 = new Formula("x + y+z", s => s.ToUpper(), s => true);
             Assert.IsTrue(f1 == new Formula(f1.ToString()));
+            Assert.AreEqual("X+Y+Z",f1.ToString());
         }
 
         /// <summary>
-        /// Test ToString
+        /// Test ToString on a more complicated formula.
         /// </summary>
         [TestMethod]
         public void publicTestToString2()
         {
+            Formula f1 = new Formula("x+ Y-3.140*(z3)/ 5e2");
+            Assert.IsTrue(f1 == new Formula(f1.ToString()));
         }
 
         ///////////////////////// Equality tests using == != Equals and GetHashCode //////////////////////////

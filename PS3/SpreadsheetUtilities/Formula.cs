@@ -30,7 +30,7 @@ namespace SpreadsheetUtilities
     public class Formula
     {
         String expression; // The normalized, validated formula, suitable for ToString()
-        List<String> variables; // A list of unique, normalized variables
+        HashSet<String> variables; // A list of unique, normalized variables
 
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
@@ -70,7 +70,7 @@ namespace SpreadsheetUtilities
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
             expression = "";
-            variables = new List<string>();
+            variables = new HashSet<string>();
 
             int numRightParens = 0;
             int numLeftParens = 0;
@@ -215,7 +215,14 @@ namespace SpreadsheetUtilities
                         {
                             opStack.Pop();
                             double leftValue = valStack.Pop();
-                            valStack.Push(applyOperation(op, leftValue, num));
+                            try
+                            {
+                                valStack.Push(applyOperation(op, leftValue, num));
+                            }
+                            catch
+                            {
+                                return new FormulaError("Division by 0.");
+                            }
                         }
                         else
                             valStack.Push(num);
@@ -277,7 +284,14 @@ namespace SpreadsheetUtilities
                             opStack.Pop();
                             double rightValue = valStack.Pop();
                             double leftValue = valStack.Pop();
-                            valStack.Push(applyOperation(op, leftValue, rightValue));
+                            try
+                            {
+                                valStack.Push(applyOperation(op, leftValue, rightValue));
+                            }
+                            catch
+                            {
+                                return new FormulaError("Division by 0.");
+                            }
                         }
                     }
 
@@ -303,7 +317,14 @@ namespace SpreadsheetUtilities
                         {
                             opStack.Pop();
                             double leftValue = valStack.Pop();
-                            valStack.Push(applyOperation(op, leftValue, num));
+                            try
+                            {
+                                valStack.Push(applyOperation(op, leftValue, num));
+                            }
+                            catch
+                            {
+                                return new FormulaError("Division by 0.");
+                            }
                         }
                         else
                             valStack.Push(num);
@@ -319,7 +340,14 @@ namespace SpreadsheetUtilities
                 double valRight = valStack.Pop();
                 double valLeft = valStack.Pop();
                 string op = opStack.Pop();
-                return applyOperation(op, valLeft, valRight);
+                try
+                {
+                    valStack.Push(applyOperation(op, valLeft, valRight));
+                }
+                catch
+                {
+                    return new FormulaError("Division by 0.");
+                }
             }
 
             return valStack.Pop();
@@ -348,7 +376,8 @@ namespace SpreadsheetUtilities
                 return leftValue / rightValue;
             }
 
-            throw new ArgumentException();
+            // Should never happen for our Formulas
+            throw new Exception();
         }
 
         /// <summary>
@@ -364,7 +393,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<String> GetVariables()
         {
-            return variables.AsReadOnly();
+            return (new List<string>(variables)).AsReadOnly();
         }
 
         /// <summary>
