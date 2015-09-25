@@ -8,8 +8,131 @@ namespace UnitTestProject1
     [TestClass]
     public class FormulaTester
     {
+        ///////////////////////////////// Tests on constructor ////////////////////////
 
-        //////// Tests on GetVariables ////////////
+        /// <summary>
+        /// Test throws error on non-normalizable variable.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void publicTestConstruct1()
+        {
+            Formula f = new Formula("3+x", norm_x_error, s => true);
+        }
+
+        /// <summary>
+        /// Test throws error on empty string.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void publicTestConstruct2()
+        {
+            Formula f = new Formula("");
+        }
+
+        /// <summary>
+        /// Test throws error on isValid(normalize(var)) false.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void publicTestConstruct3()
+        {
+            Formula f = new Formula("3.0 + x", s => s, s => false);
+        }
+         
+        /// <summary>
+        /// Test throws error on invalid syntax.
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void publicTestConstruct4()
+        {
+            Formula f = new Formula("+A");
+        }
+
+        /// <summary>
+        /// Test throws error on invalid syntax.
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void publicTestConstruct5()
+        {
+            Formula f = new Formula("3-5/");
+        }
+
+        /// <summary>
+        /// Test throws error on invalid syntax.
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void publicTestConstruct6()
+        {
+            Formula f = new Formula("2+C*7)-3");
+        }
+
+        /// <summary>
+        /// Test throws error on invalid syntax.
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void publicTestConstruct7()
+        {
+            Formula f = new Formula("(5)8");
+        }
+
+        /// <summary>
+        /// Test throws error on invalid syntax.
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void publicTestConstruct8()
+        {
+            Formula f = new Formula("((((hi))");
+        }
+
+        ///////////////////////////// Tests on Evaluate ///////////////////////
+
+        /// <summary>
+        /// Test basic usage.
+        /// </summary>
+        [TestMethod]
+        public void publicTestEvaluate1()
+        {
+            Formula f = new Formula("x + Y-0");
+            Assert.AreEqual(10d, f.Evaluate(s => 5));
+        }
+
+        /// <summary>
+        /// Test division by 0 gives FormulaError.
+        /// </summary>
+        [TestMethod]
+        public void publicTestEvaluate2()
+        {
+            Formula f = new Formula("25/(6-x)");
+            FormulaError e = (FormulaError)f.Evaluate(s => 6);
+        }
+
+        /// <summary>
+        /// Test undefined variable gives FormulaError.
+        /// </summary>
+        [TestMethod]
+        public void publicTestEvaluate3()
+        {
+            Formula f = new Formula("25*a");
+            FormulaError e = (FormulaError)f.Evaluate(s => { throw new ArgumentException(); });
+        }
+
+        /// <summary>
+        /// Test on something more complex.
+        /// </summary>
+        [TestMethod]
+        public void publicTestEvaluate4()
+        {
+            Formula f = new Formula("(_x4 - y*3)-4/2e2+ 5. *2.00000");
+            Assert.AreEqual(5.98, f.Evaluate(s => 2));
+        }
+
+        ///////////////////////////// Tests on GetVariables //////////////////
         
         /// <summary>
         /// Test GetVariables contains only the normalized variables.
@@ -43,7 +166,7 @@ namespace UnitTestProject1
             Assert.AreEqual(expected.Count, count);
         }
 
-        ///////// Tests on ToString ///////////
+        /////////////////////////// Tests on ToString //////////////////
         
         /// <summary>
         /// Test ToString returns a normalized result without whitespace.
@@ -179,6 +302,18 @@ namespace UnitTestProject1
             Assert.AreEqual(f1.GetHashCode(), f2.GetHashCode());
             Assert.IsFalse(f1 != f2);
             Assert.IsFalse(f2 != f1);
+        }
+
+        /////////////////////// Helpers for tests ///////////////////////
+
+        /// <summary>
+        /// Throws an exception for variable "x", otherwise returns s.ToUpper().
+        /// </summary>
+        public static string norm_x_error(string s)
+        {
+            if (s == "x")
+                throw new ArgumentException();
+            return s.ToUpper();
         }
     }
 }

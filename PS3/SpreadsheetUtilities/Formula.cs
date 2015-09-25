@@ -30,7 +30,7 @@ namespace SpreadsheetUtilities
     public class Formula
     {
         String expression; // The normalized, validated formula, suitable for ToString()
-        HashSet<String> variables; // A list of unique, normalized variables
+        HashSet<String> variables; // A set of unique, normalized variables
 
         /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
@@ -198,8 +198,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public object Evaluate(Func<string, double> lookup)
         {
-            ////copied
-            //todo: make work
+            //// Copied (with slight modifications) from PS1.
             Stack<string> opStack = new Stack<string>();
             Stack<double> valStack = new Stack<double>();
             foreach (string token in GetTokens(expression))
@@ -354,13 +353,9 @@ namespace SpreadsheetUtilities
         }
 
         /// <summary>
-        /// Applies the give operation (+, -, *, /) to the given parameters.
+        /// Applies the given operation (+, -, *, /) to the given parameters.
         /// Throws ArgumentException if divides by 0 or invalid operation.
         /// </summary>
-        /// <param name="op"></param>
-        /// <param name="leftValue"></param>
-        /// <param name="rightValue"></param>
-        /// <returns></returns>
         private static double applyOperation(string op, double leftValue, double rightValue)
         {
             if (op.Equals("+"))
