@@ -54,14 +54,12 @@ namespace SS
     public class Spreadsheet : AbstractSpreadsheet
     {
         private Dictionary<string, Cell> nameToCell;
-        private DependencyGraph dg;
-        private List<string> names;
+        private DependencyGraph dependencees;
 
         public Spreadsheet()
         {
             nameToCell = new Dictionary<string, Cell>();
-            dg = new DependencyGraph();
-            names = new List<string>();
+            dependencees = new DependencyGraph();
         }
 
         /// <summary>
@@ -110,7 +108,7 @@ namespace SS
         /// </summary>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
-            return names.AsReadOnly();
+            return nameToCell.Keys;
         }
 
         /// <summary>
@@ -130,6 +128,18 @@ namespace SS
         }
 
         /// <summary>
+        /// A convenience method for the SetCellContents.
+        /// Checks a name is valid and not null, sets the cell's contents, and returns
+        /// the set of dependents.
+        /// </summary>
+        private ISet<string> SetCell(string name, Object content)
+        {
+            checkValidName(name);
+            nameToCell.Add(name, new Cell(content));
+            return new HashSet<string>(GetDirectDependents(name));
+        }
+
+        /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
         /// 
         /// Otherwise, the contents of the named cell becomes number.  The method returns a
@@ -141,9 +151,7 @@ namespace SS
         /// </summary>
         public override ISet<string> SetCellContents(string name, double number)
         {
-            checkValidName(name);
-            if (!names.Contains(name))
-
+            return SetCell(name, number);
         }
 
         /// <summary>
@@ -160,7 +168,9 @@ namespace SS
         /// </summary>
         public override ISet<string> SetCellContents(string name, string text)
         {
-            throw new NotImplementedException();
+            if (text == null)
+                throw new ArgumentNullException();
+            return SetCell(name, text);
         }
 
         /// <summary>
@@ -180,7 +190,12 @@ namespace SS
         /// </summary>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
-            throw new NotImplementedException();
+            if (formula == null)
+                throw new ArgumentNullException();
+
+            //todo: only need to check for circular dependency
+
+            return SetCell(name, formula);
         }
 
         /// <summary>
@@ -202,7 +217,11 @@ namespace SS
         /// </summary>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            throw new NotImplementedException();
+            if (name == null)
+                throw new ArgumentNullException();
+            checkValidName(name);
+
+
         }
     }
 }

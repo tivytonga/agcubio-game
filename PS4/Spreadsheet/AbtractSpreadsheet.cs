@@ -180,8 +180,10 @@ namespace SS
         {
             LinkedList<String> changed = new LinkedList<String>();
             HashSet<String> visited = new HashSet<String>();
+            // Visit each dependent cell, and add it (and any subsequent dependents) to the set if not already there.
             foreach (String name in names)
             {
+                // If not visited, visit it (and its subsequent dependents)
                 if (!visited.Contains(name))
                 {
                     Visit(name, name, visited, changed);
@@ -209,16 +211,20 @@ namespace SS
         private void Visit(String start, String name, ISet<String> visited, LinkedList<String> changed)
         {
             visited.Add(name);
+            // Go through each dependent
             foreach (String n in GetDirectDependents(name))
             {
+                // If a dependent is the same as starting element, we have a circular dependency
                 if (n.Equals(start))
                 {
                     throw new CircularException();
                 }
+                // If a dependent is new, Visit it as well
                 else if (!visited.Contains(n))
                 {
                     Visit(start, n, visited, changed);
                 }
+                // Else, we have already visited, and we don't care about it
             }
             changed.AddFirst(name);
         }
