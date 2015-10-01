@@ -2,18 +2,15 @@
 using System.IO;
 using System.Collections.Generic;
 using SpreadsheetUtilities;
+using System.Text.RegularExpressions;
 
 // Eric Longberg
 // CS 3500, PS4
 // October 1, 2015
 namespace SS
 {
-    //todo: edit comments
-
-
     /// <summary>
-    /// An AbstractSpreadsheet object represents the state of a simple spreadsheet.  A 
-    /// spreadsheet consists of an infinite number of named cells.
+    /// A Spreadsheet consists of an infinite number of named cells.
     /// 
     /// A string is a valid cell name if and only if:
     ///   (1) its first character is an underscore or a letter
@@ -56,9 +53,56 @@ namespace SS
     /// </summary>
     public class Spreadsheet : AbstractSpreadsheet
     {
+        private Dictionary<string, Cell> nameToCell;
+        private DependencyGraph dg;
+        private List<string> names;
 
         public Spreadsheet()
         {
+            nameToCell = new Dictionary<string, Cell>();
+            dg = new DependencyGraph();
+            names = new List<string>();
+        }
+
+        /// <summary>
+        /// Represents a single Cell in the spreadsheet. It contains content (string, double, or Formula)
+        /// as well as value (string, double, or FormulaError).
+        /// If the content is an empty string, the cell is considered empty.
+        /// 
+        /// Assumes e.g. the user will not ask for the content as a double if said content is not a double.
+        /// </summary>
+        private class Cell
+        {
+            public Object content { get; set;}
+
+            /// <summary>
+            /// Creates a new Cell with the given content.
+            /// </summary>
+            public Cell(Object content)
+            {
+                this.content = content;
+            }
+
+            /// <summary>
+            /// Returns true if content is an empty string.
+            /// </summary>
+            public bool isEmpty()
+            {
+                if (content is String)
+                    return (string)content == "";
+                return false;
+            }
+
+        }
+
+        /// <summary>
+        /// Throws an InvalidNameException if name is null or does not follow naming requirements
+        /// (the same from Formula class).
+        /// </summary>
+        private void checkValidName(string name)
+        {
+            if (name == null || !Regex.IsMatch(name, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+                throw new InvalidNameException();
         }
 
         /// <summary>
@@ -66,7 +110,7 @@ namespace SS
         /// </summary>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
-            throw new NotImplementedException();
+            return names.AsReadOnly();
         }
 
         /// <summary>
@@ -77,7 +121,12 @@ namespace SS
         /// </summary>
         public override object GetCellContents(string name)
         {
-            throw new NotImplementedException();
+            checkValidName(name);
+            Cell cell;
+            if (nameToCell.TryGetValue(name, out cell))
+                return cell.content;
+            return ""; // All cells start as empty
+
         }
 
         /// <summary>
@@ -92,7 +141,9 @@ namespace SS
         /// </summary>
         public override ISet<string> SetCellContents(string name, double number)
         {
-            throw new NotImplementedException();
+            checkValidName(name);
+            if (!names.Contains(name))
+
         }
 
         /// <summary>
