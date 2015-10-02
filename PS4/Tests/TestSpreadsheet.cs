@@ -44,7 +44,7 @@ namespace Tests
         public void TestSetNull3()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents(null, new Formula(""));
+            sheet.SetCellContents(null, new Formula("2+2"));
         }
 
         /// <summary>

@@ -54,12 +54,12 @@ namespace SS
     public class Spreadsheet : AbstractSpreadsheet
     {
         private Dictionary<string, Cell> nameToCell;
-        private DependencyGraph dependencees;
+        private DependencyGraph dependencies;
 
         public Spreadsheet()
         {
             nameToCell = new Dictionary<string, Cell>();
-            dependencees = new DependencyGraph();
+            dependencies = new DependencyGraph();
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace SS
         {
             checkValidName(name);
             nameToCell.Add(name, new Cell(content));
-            return new HashSet<string>(GetDirectDependents(name));
+            return new HashSet<string>(GetCellsToRecalculate(name));
         }
 
         /// <summary>
@@ -192,10 +192,26 @@ namespace SS
         {
             if (formula == null)
                 throw new ArgumentNullException();
+            checkValidName(name);
 
-            //todo: only need to check for circular dependency
+            // Test if putting this Formula into the given cell will cause a CircularException.
+            foreach (string dependent in GetCellsToRecalculate(name))
+            {
+                foreach (string dependee in formula.GetVariables())
+                {
+                    if (dependent == dependee)
+                        throw new CircularException();
+                }
+            }
 
-            return SetCell(name, formula);
+            // We are now fine to add this, just update all the dependencies
+            foreach (string dependee in formula.GetVariables())
+            {
+                dependencies.AddDependency(dependee, name);
+            }
+
+            nameToCell.Add(name, new Cell(formula));
+            return new HashSet<string>(GetCellsToRecalculate(name));
         }
 
         /// <summary>
@@ -220,8 +236,7 @@ namespace SS
             if (name == null)
                 throw new ArgumentNullException();
             checkValidName(name);
-
-
+            return dependencies.GetDependents(name);
         }
     }
 }
