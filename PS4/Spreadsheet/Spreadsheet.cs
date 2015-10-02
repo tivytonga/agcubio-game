@@ -56,6 +56,9 @@ namespace SS
         private Dictionary<string, Cell> nameToCell;
         private DependencyGraph dependencies;
 
+        /// <summary>
+        /// Creates a new spreadsheet.
+        /// </summary>
         public Spreadsheet()
         {
             nameToCell = new Dictionary<string, Cell>();
@@ -71,7 +74,7 @@ namespace SS
         /// </summary>
         private class Cell
         {
-            public Object content { get; set;}
+            public Object content { get; private set;}
 
             /// <summary>
             /// Creates a new Cell with the given content.
@@ -135,7 +138,12 @@ namespace SS
         private ISet<string> SetCell(string name, Object content)
         {
             checkValidName(name);
-            nameToCell.Add(name, new Cell(content));
+            nameToCell.Remove(name);
+            // If non-empty, we will add it
+            if (!(content is string && (string)content == ""))
+            {
+                nameToCell.Add(name, new Cell(content));
+            }
             return new HashSet<string>(GetCellsToRecalculate(name));
         }
 
@@ -209,7 +217,7 @@ namespace SS
             {
                 dependencies.AddDependency(dependee, name);
             }
-
+            nameToCell.Remove(name);
             nameToCell.Add(name, new Cell(formula));
             return new HashSet<string>(GetCellsToRecalculate(name));
         }
