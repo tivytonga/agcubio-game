@@ -115,16 +115,16 @@ namespace SpreadsheetUtilities
                     expression += token;
                 }
 
-                else if (token.IsOperator())
-                {
-                    expression += token;
-                }
-
                 else if (token.IsNumber())
                 {
                     double d;
                     Double.TryParse(token, out d);
                     expression += d;
+                }
+
+                else if (token.IsOperator())
+                {
+                    expression += token;
                 }
 
                 else if (token.IsVariable())
@@ -552,7 +552,7 @@ namespace SpreadsheetUtilities
         /// <returns></returns>
         public static bool IsOperator(this string s)
         {
-            return Regex.IsMatch(s, @"[\+\-*/]");
+            return Regex.IsMatch(s, @"^[\+\-*/]$");
         }
     }
 

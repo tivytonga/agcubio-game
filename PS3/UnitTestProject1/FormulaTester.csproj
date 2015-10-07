@@ -54,9 +54,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SpreadsheetUtilities\SpreadsheetUtilities.csproj">
+    <ProjectReference Include="..\SpreadsheetUtilities\Formula.csproj">
       <Project>{4e1319b7-18c3-4540-8b73-7e7eb6dc8e1e}</Project>
-      <Name>SpreadsheetUtilities</Name>
+      <Name>Formula</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

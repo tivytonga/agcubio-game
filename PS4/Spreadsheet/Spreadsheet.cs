@@ -12,14 +12,16 @@ namespace SS
     /// <summary>
     /// A Spreadsheet consists of an infinite number of named cells.
     /// 
-    /// A string is a valid cell name if and only if:
-    ///   (1) its first character is an underscore or a letter
-    ///   (2) its remaining characters (if any) are underscores and/or letters and/or digits
-    /// Note that this is the same as the definition of valid variable from the PS3 Formula class.
+    /// A string is a cell name if and only if it consists of one or more letters,
+    /// followed by one or more digits AND it satisfies the predicate IsValid.
+    /// For example, "A15", "a15", "XY032", and "BC7" are cell names so long as they
+    /// satisfy IsValid.  On the other hand, "Z", "X_", and "hello" are not cell names,
+    /// regardless of IsValid.
     /// 
-    /// For example, "x", "_", "x2", "y_15", and "___" are all valid cell  names, but
-    /// "25", "2x", and "&" are not.  Cell names are case sensitive, so "x" and "X" are
-    /// different cell names.
+    /// Any valid incoming cell name, whether passed as a parameter or embedded in a formula,
+    /// must be normalized with the Normalize method before it is used by or saved in 
+    /// this spreadsheet.  For example, if Normalize is s => s.ToUpper(), then
+    /// the Formula "x3+a5" should be converted to "X3+A5" before use.
     /// 
     /// A spreadsheet contains a cell corresponding to every possible cell name.  (This
     /// means that a spreadsheet contains an infinite number of cells.)  In addition to 
@@ -56,7 +58,6 @@ namespace SS
         private Dictionary<string, Cell> nameToCell;
         private DependencyGraph dependencies;
         
-
         /// <summary>
         /// Creates a new spreadsheet with no extra validity conditions, a normalizer
         /// from every string to itself, and "default" version.
@@ -64,6 +65,7 @@ namespace SS
         public Spreadsheet()
             : base(s => true, s => s, "default")
         {
+            //this(s => true, s => s, "default");
         }
 
         // ADDED FOR PS5
@@ -88,18 +90,25 @@ namespace SS
 
         /// <summary>
         /// Reads a spreadsheet from the given file, and uses the given validity, normalization, and version.
+        /// 
+        /// Throws SpreadsheetReadWriteException on any of the following:
+        /// The version of the saved spreadsheet does not match the given version parameter.
+        /// Any names in the spreadsheet are invalid.
+        /// Invalid formulas or circular dependencies are encountered.
+        /// Problems opening/reading/closing the file.
+        /// anything else
         /// </summary>
         public Spreadsheet(string filePath, Func<string, bool> isValid, Func<string, string> normalize, string version)
             : base(isValid, normalize, version)
         {
-
-            //todo read file
-
             nameToCell = new Dictionary<string, Cell>();
             dependencies = new DependencyGraph();
             this.IsValid = isValid;
             this.Normalize = normalize;
             this.Version = version;
+
+            //todo read file, handle exceptions
+
             Changed = false;
         }
 
@@ -132,15 +141,32 @@ namespace SS
                 return false;
             }
 
+            /// <summary>
+            /// Returns the value (as opposed to the contents) of the cell.  The return
+            /// value is either a string, a double, or a SpreadsheetUtilities.FormulaError.
+            /// </summary>
+            public Object getValue(Func<string, double> lookup)
+            {
+                if (content is Formula)
+                {
+                    return ((Formula)content).Evaluate(lookup);
+                }
+                return content;
+            }
+
         }
 
+
+        // todo lookup function
+        private Func<string, double> lookup;
+
         /// <summary>
-        /// Throws an InvalidNameException if name is null or does not follow naming requirements
-        /// (the same from Formula class).
+        /// Throws an InvalidNameException if name is null or does not follow naming requirements:
+        /// One or more letters followed by one or more digits and satisfying the spreadsheet's IsValid.
         /// </summary>
         private void checkValidName(string name)
         {
-            if (name == null || !Regex.IsMatch(name, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+            if (name == null || !Regex.IsMatch(name, @"^[a-zA-Z]+\d+$"))
                 throw new InvalidNameException();
         }
 
@@ -353,7 +379,12 @@ namespace SS
         /// </summary>
         public override object GetCellValue(string name)
         {
-            throw new NotImplementedException();
+            checkValidName(name);
+            name = Normalize(name);
+            Cell cell;
+            if (nameToCell.TryGetValue(name, out cell))
+                return cell.getValue(lookup);
+            return ""; // default value is empty string
         }
 
         // ADDED FOR PS5
@@ -388,7 +419,24 @@ namespace SS
         /// </summary>
         public override ISet<string> SetContentsOfCell(string name, string content)
         {
-            throw new NotImplementedException();
+            if (content == null)
+                throw new ArgumentNullException();
+            checkValidName(name);
+            name = Normalize(name);
+            Changed = true;
+            
+            double d;
+            if (Double.TryParse(content, out d))
+                return SetCellContents(name, d);
+
+            if (content[0] == '=')
+            {
+                content = content.Split('=')[1];
+                Formula f = new Formula(content, Normalize, IsValid);
+                return SetCellContents(name, f);
+            }
+
+            return SetCellContents(name, content);
         }
     }
 }

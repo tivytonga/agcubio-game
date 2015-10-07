@@ -34,7 +34,8 @@
     <Reference Include="DependencyGraph">
       <HintPath>..\Resources\Libraries\DependencyGraph.dll</HintPath>
     </Reference>
-    <Reference Include="Formula">
+    <Reference Include="Formula, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Resources\Libraries\Formula.dll</HintPath>
     </Reference>
     <Reference Include="System" />
