@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml;
 using System.IO;
 using System.Collections.Generic;
 using SpreadsheetUtilities;
@@ -57,15 +58,16 @@ namespace SS
     {
         private Dictionary<string, Cell> nameToCell;
         private DependencyGraph dependencies;
+        private bool changed;
+        private string version;
         
         /// <summary>
         /// Creates a new spreadsheet with no extra validity conditions, a normalizer
         /// from every string to itself, and "default" version.
         /// </summary>
         public Spreadsheet()
-            : base(s => true, s => s, "default")
+            : this(s => true, s => s, "default")
         {
-            //this(s => true, s => s, "default");
         }
 
         // ADDED FOR PS5
@@ -84,8 +86,8 @@ namespace SS
             dependencies = new DependencyGraph();
             this.IsValid = isValid;
             this.Normalize = normalize;
-            this.Version = version;
-            Changed = false;
+            this.version = version;
+            changed = false;
         }
 
         /// <summary>
@@ -105,11 +107,114 @@ namespace SS
             dependencies = new DependencyGraph();
             this.IsValid = isValid;
             this.Normalize = normalize;
-            this.Version = version;
+            this.version = version;
 
-            //todo read file, handle exceptions
+            try
+            {
+                // Read from the given file
+                using (XmlReader reader = XmlReader.Create(filePath))
+                {
+                    try
+                    {
+                        // ignore the <?xml version="1.0" encoding="utf-8"?> part
+                        reader.Read();
+                    }
+                    catch
+                    {
+                        throw new SpreadsheetReadWriteException("Missing xml information or file is empty.");
+                    }
 
-            Changed = false;
+                    // Go through opening <spreadsheet version="version info">
+                    reader.Read();
+                    if (reader.Name != "spreadsheet")
+                        throw new SpreadsheetReadWriteException("Invalid format (first element of xml file was not \"spreadsheet\").");
+
+                    reader.MoveToNextAttribute();
+                    if (reader.Name != "version")
+                        throw new SpreadsheetReadWriteException("Spreadsheet did not have \"version\" as first and only attribute.");
+                    if (reader.Value != version)
+                        throw new SpreadsheetReadWriteException("Saved spreadsheet version does not match the given version parameter.");
+
+                    string name;
+                    string contents;
+
+                    // Read through all the cells. Must take the form:
+                    // <cell> <name>...</name> <contents>...</contents> </cell>
+                    while (reader.Read())
+                    {
+                        // <cell>
+                        if (reader.Name == "cell")
+                        {
+                            reader.Read();
+
+                            // <name>
+                            if (reader.Name == "name")
+                            {
+                                reader.Read();
+                                name = reader.Value;
+                                reader.Read();
+
+                                // </name>
+                                if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "name")
+                                {
+                                    reader.Read();
+
+                                    // <contents>
+                                    if (reader.Name == "contents")
+                                    {
+                                        reader.Read();
+                                        contents = reader.Value;
+                                        reader.Read();
+
+                                        // </contents>
+                                        if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "contents")
+                                        {
+                                            reader.Read();
+
+                                            // </cell>
+                                            if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "cell")
+                                            {
+                                                SetContentsOfCell(name, contents);
+                                                continue;
+                                            }
+                                            else
+                                                throw new SpreadsheetReadWriteException("Expected close of cell element but detected: " + reader.Name);
+                                        }
+                                        else
+                                            throw new SpreadsheetReadWriteException("Expected close of contents element but detected: " + reader.Name);
+                                    }
+                                    else
+                                        throw new SpreadsheetReadWriteException("Expected open of contents element but detected: " + reader.Name);
+                                }
+                                else
+                                    throw new SpreadsheetReadWriteException("Expected close of name element but detected: " + reader.Name);
+                            }
+                            else
+                                throw new SpreadsheetReadWriteException("Expected open of name element detected: " + reader.Name);
+                        }
+
+                        else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "spreadsheet")
+                        {
+                            continue;
+                        }
+
+                        else
+                            throw new SpreadsheetReadWriteException("Expected beginning of cell element or close of spreadsheet but detected: " + reader.Name);
+                    }
+                }
+            }
+            catch (InvalidOperationException e)
+            {
+                // File could not be read, line missing
+                throw new SpreadsheetReadWriteException("Invalid file format.");
+            }
+            catch (FileNotFoundException e)
+            {
+                throw new SpreadsheetReadWriteException("File could not be found.");
+            }
+
+            // Start off as unchanged
+            changed = false;
         }
 
         /// <summary>
@@ -156,9 +261,20 @@ namespace SS
 
         }
 
+        /// <summary>
+        /// Intended for use in Formula.Evaluate(lookup).
+        /// Returns the double value of a given (normalized) variable (if it has one), otherwise
+        /// throws an ArgumentException.
+        /// </summary>
+        private double lookup(string var)
+        {
+            Object val = GetCellValue(var);
 
-        // todo lookup function
-        private Func<string, double> lookup;
+            if (!(val is Double))
+                throw new ArgumentException();
+
+            return (double)val;
+        }
 
         /// <summary>
         /// Throws an InvalidNameException if name is null or does not follow naming requirements:
@@ -320,11 +436,11 @@ namespace SS
         {
             get
             {
-                throw new NotImplementedException();
+                return changed;
             }
             protected set
             {
-                throw new NotImplementedException();
+                changed = value;
             }
         }
 
@@ -336,7 +452,36 @@ namespace SS
         /// </summary>
         public override string GetSavedVersion(string filename)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (XmlReader reader = XmlReader.Create(filename))
+                {
+                    try
+                    {
+                        // ignore the <?xml version="1.0" encoding="utf-8"?> part
+                        reader.Read();
+                    }
+                    catch
+                    {
+                        throw new SpreadsheetReadWriteException("Missing xml information or file is empty.");
+                    }
+
+                    // Go through opening <spreadsheet version="version info">
+                    reader.Read();
+                    if (reader.Name != "spreadsheet")
+                        throw new SpreadsheetReadWriteException("Invalid file format (first element of xml file was not \"spreadsheet\").");
+
+                    reader.MoveToNextAttribute();
+                    if (reader.Name != "version")
+                        throw new SpreadsheetReadWriteException("Spreadsheet did not have \"version\" as first and only attribute.");
+
+                    return reader.Value;
+                }
+            }
+            catch
+            {
+                throw new SpreadsheetReadWriteException("Invalid file format.");
+            }
         }
 
         // ADDED FOR PS5
@@ -367,7 +512,40 @@ namespace SS
         /// </summary>
         public override void Save(string filename)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (XmlWriter writer = XmlWriter.Create(filename))
+                {
+                    writer.WriteStartElement("spreadsheet");
+                    writer.WriteAttributeString("version", version);
+
+                    foreach (string name in GetNamesOfAllNonemptyCells())
+                    {
+                        writer.WriteStartElement("cell");
+
+                        writer.WriteStartElement("name");
+                        writer.WriteValue(name);
+                        writer.WriteEndElement();
+
+                        writer.WriteStartElement("contents");
+                        Object content = GetCellContents(name);
+                        if (content is Formula)
+                        {
+                            content = "=" + content.ToString();
+                        }
+                        writer.WriteValue(content.ToString());
+                        writer.WriteEndElement();
+
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteEndElement();
+                }
+            }
+            catch (Exception e)
+            {
+                throw new SpreadsheetReadWriteException("Unknown error: " + e);
+            }
         }
 
         // ADDED FOR PS5

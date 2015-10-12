@@ -13,6 +13,8 @@ namespace Tests
     [TestClass]
     public class TestSpreadsheet
     {
+        // Todo: update existing tests to fit changes in PS5
+        // Todo: add new tests
 
         /// <summary>
         /// Tests the spreadsheet's dependencies capabilities.
@@ -21,24 +23,24 @@ namespace Tests
         public void TestComplex()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("A1", 5);
-            sheet.SetCellContents("A2", new Formula("5-A1"));
-            sheet.SetCellContents("B2", "stringy");
-            sheet.SetCellContents("name", 20);
-            sheet.SetCellContents("name", "new");
-            sheet.SetCellContents("A3", new Formula("A1*2"));
-            sheet.SetCellContents("A4", new Formula("A2+3*A3"));
-            sheet.SetCellContents("A5", new Formula("A4+A1"));
+            sheet.SetContentsOfCell("A1", "5");
+            sheet.SetContentsOfCell("A2", "=" + new Formula("5-A1").ToString());
+            sheet.SetContentsOfCell("B2", "stringy");
+            sheet.SetContentsOfCell("name", "20");
+            sheet.SetContentsOfCell("name", "new");
+            sheet.SetContentsOfCell("A3", "=" + new Formula("A1*2").ToString());
+            sheet.SetContentsOfCell("A4", "=" + new Formula("A2+3*A3").ToString());
+            sheet.SetContentsOfCell("A5", "=" + new Formula("A4+A1").ToString());
 
 
             HashSet<string> names = new HashSet<string> { "A1", "A2", "B2", "name", "A3", "A4", "A5" };
             Assert.IsTrue(names.SetEquals(sheet.GetNamesOfAllNonemptyCells()));
 
             HashSet<string> A1dependents = new HashSet<string> { "A1", "A2", "A3", "A4", "A5" };
-            Assert.IsTrue(A1dependents.SetEquals(sheet.SetCellContents("A1", 5)));
+            Assert.IsTrue(A1dependents.SetEquals(sheet.SetContentsOfCell("A1", "5")));
 
-            HashSet<string> A4dependents = new HashSet<string> { "A4", "A5"};
-            Assert.IsTrue(A4dependents.SetEquals(sheet.SetCellContents("A4", new Formula("A2+3*A3"))));
+            HashSet<string> A4dependents = new HashSet<string> { "A4", "A5" };
+            Assert.IsTrue(A4dependents.SetEquals(sheet.SetContentsOfCell("A4", "=" + new Formula("A2+3*A3").ToString())));
         }
 
         /// <summary>
@@ -70,9 +72,9 @@ namespace Tests
         public void TestGetContents3()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("string", "content");
-            sheet.SetCellContents("double", 5.6);
-            sheet.SetCellContents("formula", new Formula("3*3"));
+            sheet.SetContentsOfCell("string", "content");
+            sheet.SetContentsOfCell("double", "5.6");
+            sheet.SetContentsOfCell("formula", "=" + new Formula("3*3").ToString());
 
             Assert.IsTrue(sheet.GetCellContents("string") is string);
             Assert.IsTrue(sheet.GetCellContents("double") is double);
@@ -80,7 +82,7 @@ namespace Tests
 
             Assert.AreEqual("content", (string)sheet.GetCellContents("string"));
             Assert.AreEqual(5.6, (double)sheet.GetCellContents("double"));
-            Assert.AreEqual(new Formula("3*3"), (Formula)sheet.GetCellContents("formula"));
+            Assert.AreEqual("=" + new Formula("3*3"), (Formula)sheet.GetCellContents("formula"));
 
             Assert.AreEqual("", (string)sheet.GetCellContents("DNE"));
         }
@@ -93,9 +95,9 @@ namespace Tests
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
             HashSet<string> set = new HashSet<string> { "a", "b", "c" };
-            sheet.SetCellContents("a", 3);
-            sheet.SetCellContents("b", "hello");
-            sheet.SetCellContents("c", new Formula("3+3"));
+            sheet.SetContentsOfCell("a", "3");
+            sheet.SetContentsOfCell("b", "hello");
+            sheet.SetContentsOfCell("c", "=" + new Formula("3+3").ToString());
             Assert.IsTrue(set.SetEquals(sheet.GetNamesOfAllNonemptyCells()));
         }
 
@@ -106,13 +108,13 @@ namespace Tests
         public void TestGetNames2()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            HashSet<string> set = new HashSet<string> {"b", "c" };
-            sheet.SetCellContents("a", 3);
-            sheet.SetCellContents("b", "hello");
-            sheet.SetCellContents("c", new Formula("3+3"));
+            HashSet<string> set = new HashSet<string> { "b", "c" };
+            sheet.SetContentsOfCell("a", "3");
+            sheet.SetContentsOfCell("b", "hello");
+            sheet.SetContentsOfCell("c", "=" + new Formula("3+3").ToString());
 
-            sheet.SetCellContents("a", "");
-            sheet.SetCellContents("lmnop", "");
+            sheet.SetContentsOfCell("a", "");
+            sheet.SetContentsOfCell("lmnop", "");
 
             Assert.IsTrue(set.SetEquals(sheet.GetNamesOfAllNonemptyCells()));
         }
@@ -124,10 +126,10 @@ namespace Tests
         public void TestSetContents1()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("foo", new Formula("Cauchy+4"));
-            sheet.SetCellContents("bar", "content");
+            sheet.SetContentsOfCell("foo", "=" + new Formula("Cauchy+4").ToString());
+            sheet.SetContentsOfCell("bar", "content");
 
-            HashSet<string> actual = new HashSet<string>(sheet.SetCellContents("Cauchy", 3.14));
+            HashSet<string> actual = new HashSet<string>(sheet.SetContentsOfCell("Cauchy", "3.14"));
 
             HashSet<string> expected = new HashSet<string>();
 
@@ -144,11 +146,11 @@ namespace Tests
         public void TestSetContents2()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a", new Formula("b+c+d"));
-            sheet.SetCellContents("b", new Formula("c+d"));
-            sheet.SetCellContents("c", new Formula("d"));
+            sheet.SetContentsOfCell("a", "=" + new Formula("b+c+d").ToString());
+            sheet.SetContentsOfCell("b", "=" + new Formula("c+d").ToString());
+            sheet.SetContentsOfCell("c", "=" + new Formula("d").ToString());
 
-            HashSet<string> actual = new HashSet<string>(sheet.SetCellContents("d", 1));
+            HashSet<string> actual = new HashSet<string>(sheet.SetContentsOfCell("d", "1"));
 
             HashSet<string> expected = new HashSet<string> { "a", "b", "c", "d" };
 
@@ -163,7 +165,7 @@ namespace Tests
         public void TestSetContents3()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a", new Formula("a"));
+            sheet.SetContentsOfCell("a", "=" + new Formula("a").ToString());
         }
 
         /// <summary>
@@ -174,42 +176,42 @@ namespace Tests
         public void TestSetContents4()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a", new Formula("b"));
-            sheet.SetCellContents("b", new Formula("c"));
-            sheet.SetCellContents("c", new Formula("a"));
+            sheet.SetContentsOfCell("a", "=" + new Formula("b").ToString());
+            sheet.SetContentsOfCell("b", "=" + new Formula("c").ToString());
+            sheet.SetContentsOfCell("c", "=" + new Formula("a").ToString());
         }
 
         /// <summary>
-        /// Test that SetCellContents gives correct exception (invalid name, double).
+        /// Test that SetContentsOfCell gives correct exception (invalid name, double).
         /// </summary>
         [ExpectedException(typeof(InvalidNameException))]
         [TestMethod]
         public void TestSetContents5()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("$%&", 3.3);
+            sheet.SetContentsOfCell("$%&", "3.3");
         }
 
         /// <summary>
-        /// Test that SetCellContents gives correct exception (invalid name, string).
+        /// Test that SetContentsOfCell gives correct exception (invalid name, string).
         /// </summary>
         [ExpectedException(typeof(InvalidNameException))]
         [TestMethod]
         public void TestSetContents6()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("$%&", "hi");
+            sheet.SetContentsOfCell("$%&", "hi");
         }
 
         /// <summary>
-        /// Test that SetCellContents gives correct exception (invalid name, Formula).
+        /// Test that SetContentsOfCell gives correct exception (invalid name, Formula).
         /// </summary>
         [ExpectedException(typeof(InvalidNameException))]
         [TestMethod]
         public void TestSetContents7()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("$%&", new Formula("3+5"));
+            sheet.SetContentsOfCell("$%&", "=" + new Formula("3+5").ToString());
         }
 
         /// <summary>
@@ -220,7 +222,7 @@ namespace Tests
         public void TestSetNull1()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents(null, 1);
+            sheet.SetContentsOfCell(null, "1");
         }
 
         /// <summary>
@@ -231,7 +233,7 @@ namespace Tests
         public void TestSetNull2()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents(null, "a");
+            sheet.SetContentsOfCell(null, "a");
         }
 
         /// <summary>
@@ -242,7 +244,7 @@ namespace Tests
         public void TestSetNull3()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents(null, new Formula("2+2"));
+            sheet.SetContentsOfCell(null, "=" + new Formula("2+2").ToString());
         }
 
         /// <summary>
@@ -254,7 +256,7 @@ namespace Tests
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
             string s = null;
-            sheet.SetCellContents("name", s);
+            sheet.SetContentsOfCell("name", s);
         }
 
         /// <summary>
@@ -265,8 +267,8 @@ namespace Tests
         public void TestSetNull5()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            Formula f = null;
-            sheet.SetCellContents("name", f);
+            String f = null;
+            sheet.SetContentsOfCell("name", f);
         }
 
         /// <summary>
@@ -278,7 +280,7 @@ namespace Tests
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
             string s = null;
-            sheet.SetCellContents(null, s);
+            sheet.SetContentsOfCell(null, s);
         }
 
         /// <summary>
@@ -289,8 +291,8 @@ namespace Tests
         public void TestSetNull7()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            Formula f = null;
-            sheet.SetCellContents(null, f);
+            String f = null;
+            sheet.SetContentsOfCell(null, f);
         }
     }
 }
