@@ -61,6 +61,9 @@ namespace SS
         private bool changed;
         private string version;
         
+        // todo: import PS4 graded tests over, use in master branch though
+        // todo: README
+
         /// <summary>
         /// Creates a new spreadsheet with no extra validity conditions, a normalizer
         /// from every string to itself, and "default" version.
@@ -278,7 +281,7 @@ namespace SS
 
         /// <summary>
         /// Throws an InvalidNameException if name is null or does not follow naming requirements:
-        /// One or more letters followed by one or more digits and satisfying the spreadsheet's IsValid.
+        /// One or more letters followed by one or more digits.
         /// </summary>
         private void checkValidName(string name)
         {
@@ -303,6 +306,9 @@ namespace SS
         public override object GetCellContents(string name)
         {
             checkValidName(name);
+            name = Normalize(name);
+            if (!IsValid(name))
+                throw new InvalidNameException();
             Cell cell;
             if (nameToCell.TryGetValue(name, out cell))
                 return cell.content;
@@ -559,6 +565,8 @@ namespace SS
         {
             checkValidName(name);
             name = Normalize(name);
+            if (!IsValid(name))
+                throw new InvalidNameException();
             Cell cell;
             if (nameToCell.TryGetValue(name, out cell))
                 return cell.getValue(lookup);
@@ -601,13 +609,16 @@ namespace SS
                 throw new ArgumentNullException();
             checkValidName(name);
             name = Normalize(name);
+            if (!IsValid(name))
+                throw new InvalidNameException();
+
             Changed = true;
             
             double d;
             if (Double.TryParse(content, out d))
                 return SetCellContents(name, d);
 
-            if (content[0] == '=')
+            if (content.Length > 0 && content[0] == '=')
             {
                 content = content.Split('=')[1];
                 Formula f = new Formula(content, Normalize, IsValid);

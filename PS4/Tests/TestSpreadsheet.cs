@@ -13,8 +13,7 @@ namespace Tests
     [TestClass]
     public class TestSpreadsheet
     {
-        // Todo: update existing tests to fit changes in PS5
-        // Todo: add new tests
+        // Todo: (tests) constructors, GetNamesOfAllNonemptyCells, GetCellContents, Changed, GetSavedVersion, Save, GetCellValue, SetContentsOfCell
 
         /// <summary>
         /// Tests the spreadsheet's dependencies capabilities.
@@ -26,14 +25,14 @@ namespace Tests
             sheet.SetContentsOfCell("A1", "5");
             sheet.SetContentsOfCell("A2", "=" + new Formula("5-A1").ToString());
             sheet.SetContentsOfCell("B2", "stringy");
-            sheet.SetContentsOfCell("name", "20");
-            sheet.SetContentsOfCell("name", "new");
+            sheet.SetContentsOfCell("C3", "20");
+            sheet.SetContentsOfCell("C3", "new");
             sheet.SetContentsOfCell("A3", "=" + new Formula("A1*2").ToString());
             sheet.SetContentsOfCell("A4", "=" + new Formula("A2+3*A3").ToString());
             sheet.SetContentsOfCell("A5", "=" + new Formula("A4+A1").ToString());
 
 
-            HashSet<string> names = new HashSet<string> { "A1", "A2", "B2", "name", "A3", "A4", "A5" };
+            HashSet<string> names = new HashSet<string> { "A1", "A2", "B2", "C3", "A3", "A4", "A5" };
             Assert.IsTrue(names.SetEquals(sheet.GetNamesOfAllNonemptyCells()));
 
             HashSet<string> A1dependents = new HashSet<string> { "A1", "A2", "A3", "A4", "A5" };
@@ -72,19 +71,19 @@ namespace Tests
         public void TestGetContents3()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetContentsOfCell("string", "content");
-            sheet.SetContentsOfCell("double", "5.6");
-            sheet.SetContentsOfCell("formula", "=" + new Formula("3*3").ToString());
+            sheet.SetContentsOfCell("string1", "content");
+            sheet.SetContentsOfCell("double1", "5.6");
+            sheet.SetContentsOfCell("formula1", "=" + new Formula("3*3").ToString());
 
-            Assert.IsTrue(sheet.GetCellContents("string") is string);
-            Assert.IsTrue(sheet.GetCellContents("double") is double);
-            Assert.IsTrue(sheet.GetCellContents("formula") is Formula);
+            Assert.IsTrue(sheet.GetCellContents("string1") is string);
+            Assert.IsTrue(sheet.GetCellContents("double1") is double);
+            Assert.IsTrue(sheet.GetCellContents("formula1") is Formula);
 
-            Assert.AreEqual("content", (string)sheet.GetCellContents("string"));
-            Assert.AreEqual(5.6, (double)sheet.GetCellContents("double"));
-            Assert.AreEqual("=" + new Formula("3*3"), (Formula)sheet.GetCellContents("formula"));
+            Assert.AreEqual("content", (string)sheet.GetCellContents("string1"));
+            Assert.AreEqual(5.6, (double)sheet.GetCellContents("double1"));
+            Assert.AreEqual(new Formula("3*3"), (Formula)sheet.GetCellContents("formula1"));
 
-            Assert.AreEqual("", (string)sheet.GetCellContents("DNE"));
+            Assert.AreEqual("", (string)sheet.GetCellContents("DNE1"));
         }
 
         /// <summary>
@@ -94,10 +93,10 @@ namespace Tests
         public void TestGetNames1()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            HashSet<string> set = new HashSet<string> { "a", "b", "c" };
-            sheet.SetContentsOfCell("a", "3");
-            sheet.SetContentsOfCell("b", "hello");
-            sheet.SetContentsOfCell("c", "=" + new Formula("3+3").ToString());
+            HashSet<string> set = new HashSet<string> { "a1", "b1", "c1" };
+            sheet.SetContentsOfCell("a1", "3");
+            sheet.SetContentsOfCell("b1", "hello");
+            sheet.SetContentsOfCell("c1", "=" + new Formula("3+3").ToString());
             Assert.IsTrue(set.SetEquals(sheet.GetNamesOfAllNonemptyCells()));
         }
 
@@ -108,13 +107,13 @@ namespace Tests
         public void TestGetNames2()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            HashSet<string> set = new HashSet<string> { "b", "c" };
-            sheet.SetContentsOfCell("a", "3");
-            sheet.SetContentsOfCell("b", "hello");
-            sheet.SetContentsOfCell("c", "=" + new Formula("3+3").ToString());
+            HashSet<string> set = new HashSet<string> { "b1", "c1" };
+            sheet.SetContentsOfCell("a1", "3");
+            sheet.SetContentsOfCell("b1", "hello");
+            sheet.SetContentsOfCell("c1", "=" + new Formula("3+3").ToString());
 
-            sheet.SetContentsOfCell("a", "");
-            sheet.SetContentsOfCell("lmnop", "");
+            sheet.SetContentsOfCell("a1", "");
+            sheet.SetContentsOfCell("lmnop1", "");
 
             Assert.IsTrue(set.SetEquals(sheet.GetNamesOfAllNonemptyCells()));
         }
@@ -126,15 +125,15 @@ namespace Tests
         public void TestSetContents1()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetContentsOfCell("foo", "=" + new Formula("Cauchy+4").ToString());
-            sheet.SetContentsOfCell("bar", "content");
+            sheet.SetContentsOfCell("foo1", "=" + new Formula("Cauchy1+4").ToString());
+            sheet.SetContentsOfCell("bar1", "content");
 
-            HashSet<string> actual = new HashSet<string>(sheet.SetContentsOfCell("Cauchy", "3.14"));
+            HashSet<string> actual = new HashSet<string>(sheet.SetContentsOfCell("Cauchy1", "3.14"));
 
             HashSet<string> expected = new HashSet<string>();
 
-            expected.Add("foo");
-            expected.Add("Cauchy");
+            expected.Add("foo1");
+            expected.Add("Cauchy1");
 
             Assert.IsTrue(expected.SetEquals(actual));
         }
@@ -146,13 +145,13 @@ namespace Tests
         public void TestSetContents2()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetContentsOfCell("a", "=" + new Formula("b+c+d").ToString());
-            sheet.SetContentsOfCell("b", "=" + new Formula("c+d").ToString());
-            sheet.SetContentsOfCell("c", "=" + new Formula("d").ToString());
+            sheet.SetContentsOfCell("a1", "=" + new Formula("b1+c1+d1").ToString());
+            sheet.SetContentsOfCell("b1", "=" + new Formula("c1+d1").ToString());
+            sheet.SetContentsOfCell("c1", "=" + new Formula("d1").ToString());
 
-            HashSet<string> actual = new HashSet<string>(sheet.SetContentsOfCell("d", "1"));
+            HashSet<string> actual = new HashSet<string>(sheet.SetContentsOfCell("d1", "1"));
 
-            HashSet<string> expected = new HashSet<string> { "a", "b", "c", "d" };
+            HashSet<string> expected = new HashSet<string> { "a1", "b1", "c1", "d1" };
 
             Assert.IsTrue(expected.SetEquals(actual));
         }
@@ -165,7 +164,7 @@ namespace Tests
         public void TestSetContents3()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetContentsOfCell("a", "=" + new Formula("a").ToString());
+            sheet.SetContentsOfCell("a1", "=" + new Formula("a1").ToString());
         }
 
         /// <summary>
@@ -176,9 +175,9 @@ namespace Tests
         public void TestSetContents4()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetContentsOfCell("a", "=" + new Formula("b").ToString());
-            sheet.SetContentsOfCell("b", "=" + new Formula("c").ToString());
-            sheet.SetContentsOfCell("c", "=" + new Formula("a").ToString());
+            sheet.SetContentsOfCell("a1", "=" + new Formula("b1").ToString());
+            sheet.SetContentsOfCell("b1", "=" + new Formula("c1").ToString());
+            sheet.SetContentsOfCell("c1", "=" + new Formula("a1").ToString());
         }
 
         /// <summary>
