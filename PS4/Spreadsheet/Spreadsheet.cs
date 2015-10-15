@@ -203,10 +203,19 @@ namespace SS
             {
                 throw new SpreadsheetReadWriteException("File could not be found.");
             }
-            catch
+            catch (InvalidOperationException e)
             {
                 // File could not be read, line missing
                 throw new SpreadsheetReadWriteException("Invalid file format.");
+            }
+            catch (XmlException e)
+            {
+                // File could not be read, line missing
+                throw new SpreadsheetReadWriteException("Invalid file format.");
+            }
+            catch (CircularException e)
+            {
+                throw new SpreadsheetReadWriteException("Circular dependency detected.");
             }
 
             // Start off as unchanged
@@ -315,6 +324,27 @@ namespace SS
         }
 
         /// <summary>
+        /// Removes the cell with the given name from the dictionary, and if it is a formula
+        /// then removes any dependencies necessary.
+        /// </summary>
+        private void Remove(string name)
+        {
+            if (nameToCell.ContainsKey(name))
+            {
+                Object contents = GetCellContents(name);
+                if (contents is Formula)
+                {
+                    foreach (string dependee in ((Formula)contents).GetVariables())
+                    {
+                        dependencies.RemoveDependency(dependee, name);
+                    }
+                }
+
+                nameToCell.Remove(name);
+            }
+        }
+
+        /// <summary>
         /// A convenience method for the SetCellContents.
         /// Checks a name is valid and not null, sets the cell's contents, and returns
         /// the set of dependents.
@@ -322,12 +352,13 @@ namespace SS
         private ISet<string> SetCell(string name, Object content)
         {
             checkValidName(name);
-            nameToCell.Remove(name);
+            Remove(name);
             // If non-empty, we will add it
             if (!(content is string && (string)content == ""))
             {
                 nameToCell.Add(name, new Cell(content));
             }
+
             return new HashSet<string>(GetCellsToRecalculate(name));
         }
 
@@ -401,7 +432,7 @@ namespace SS
             {
                 dependencies.AddDependency(dependee, name);
             }
-            nameToCell.Remove(name);
+            Remove(name);
             nameToCell.Add(name, new Cell(formula));
             return new HashSet<string>(GetCellsToRecalculate(name));
         }
@@ -458,20 +489,22 @@ namespace SS
         {
             try
             {
-                using (XmlReader reader = XmlReader.Create(filename))
+
+                // Setup XML settings
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.IgnoreWhitespace = true;
+                settings.IgnoreComments = true;
+                settings.IgnoreProcessingInstructions = true;
+
+                // Read from the given file
+                using (XmlReader reader = XmlReader.Create(filename, settings))
                 {
-                    try
-                    {
-                        // ignore the <?xml version="1.0" encoding="utf-8"?> part
+                    // ignore the <?xml version="1.0" encoding="utf-8"?> part
+                    reader.Read();
+                    if (reader.NodeType == XmlNodeType.XmlDeclaration)
                         reader.Read();
-                    }
-                    catch
-                    {
-                        throw new SpreadsheetReadWriteException("Missing xml information or file is empty.");
-                    }
 
                     // Go through opening <spreadsheet version="version info">
-                    reader.Read();
                     if (reader.Name != "spreadsheet")
                         throw new SpreadsheetReadWriteException("Invalid file format (first element of xml file was not \"spreadsheet\").");
 

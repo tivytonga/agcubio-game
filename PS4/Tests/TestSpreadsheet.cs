@@ -13,18 +13,144 @@ namespace Tests
     [TestClass]
     public class TestSpreadsheet
     {
-        // Todo: stress-test (read/write), Changed, GetCellValue
+        /// <summary>
+        /// Stress tests the spreadsheet, saving/reading several times with randomized elements.
+        /// (Adapted from graded tests 47-50)
+        /// </summary>
+        [TestMethod]
+        public void TestStressful()
+        {
+            AbstractSpreadsheet sheet1;
+            AbstractSpreadsheet sheet2;
+            for (int testNumber = 0; testNumber < 10; testNumber++)
+            {
+                sheet1 = new Spreadsheet();
+                Random rand = new Random(testNumber);
+                for (int i = 0; i < 10000; i++)
+                {
+                    try
+                    {
+                        switch (rand.Next(3))
+                        {
+                            case 0:
+                                sheet1.SetContentsOfCell(randomName(rand), "2.718");
+                                break;
+                            case 1:
+                                sheet1.SetContentsOfCell(randomName(rand), "hello");
+                                break;
+                            case 2:
+                                sheet1.SetContentsOfCell(randomName(rand), randomFormula(rand));
+                                break;
+                        }
+                    }
+                    catch (CircularException)
+                    {
+                    }
+                }
+                sheet1.Save("../../TestXMLs/StressTest.xml");
+
+                sheet2 = new Spreadsheet("../../TestXMLs/StressTest.xml", s => true, s => s, "default");
+
+                var names1 = new HashSet<string>(sheet1.GetNamesOfAllNonemptyCells());
+                var names2 = new HashSet<string>(sheet2.GetNamesOfAllNonemptyCells());
+
+                Assert.AreEqual(names1.Count, names2.Count);
+
+                foreach (string name in names1)
+                {
+                    Assert.AreEqual(sheet1.GetCellContents(name), sheet2.GetCellContents(name));
+                    Assert.AreEqual(sheet1.GetCellValue(name), sheet2.GetCellValue(name));
+                }
+            }
+
+        }
 
         /// <summary>
-        /// Test constructor correctly uses Normalize.
+        /// Test get value returns correct error when name is null.
+        /// </summary>
+        [ExpectedException(typeof(InvalidNameException))]
+        [TestMethod]
+        public void TestGetCellValue1()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "2.718");
+            sheet.GetCellValue(null);
+        }
+
+        /// <summary>
+        /// Test get value returns correct error when name is invalid.
+        /// </summary>
+        [ExpectedException(typeof(InvalidNameException))]
+        [TestMethod]
+        public void TestGetCellValue2()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "2.718");
+            sheet.GetCellValue("invalidName");
+        }
+
+        /// <summary>
+        /// Test get value returns correct value (string).
+        /// </summary>
+        [TestMethod]
+        public void TestGetCellValue3()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "hi");
+            Assert.AreEqual("hi", (string)sheet.GetCellValue("A1"));
+        }
+
+        /// <summary>
+        /// Test get value returns correct value (double).
+        /// </summary>
+        [TestMethod]
+        public void TestGetCellValue4()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "2.718");
+            Assert.AreEqual(2.718, (double)sheet.GetCellValue("A1"));
+        }
+
+        /// <summary>
+        /// Test get value returns correct value (FormulaError).
+        /// </summary>
+        [TestMethod]
+        public void TestGetCellValue5()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "=C9");
+            Assert.IsTrue(sheet.GetCellValue("A1") is FormulaError);
+        }
+
+        /// <summary>
+        /// Test get value returns correct value (valid formulas).
+        /// </summary>
+        [TestMethod]
+        public void TestGetCellValue6()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("A1", "=C9*2");
+            sheet.SetContentsOfCell("C9", "=10*D13");
+            sheet.SetContentsOfCell("D13", "5");
+
+            Assert.AreEqual(100.0, (double)sheet.GetCellValue("A1"));
+        }
+
+
+        /// <summary>
+        /// Test constructor correctly uses Normalize, and Changed is updated appropriately.
         /// </summary>
         [TestMethod]
         public void TestConstructor1()
         {
             AbstractSpreadsheet sheet = new Spreadsheet(s => true, s => s.ToUpper(), "default");
+            Assert.IsFalse(sheet.Changed);
+
             sheet.SetContentsOfCell("a3", "=d5*2");
             sheet.SetContentsOfCell("D5", "10");
             sheet.SetContentsOfCell("other1", "hello");
+
+            Assert.IsTrue(sheet.Changed);
 
             HashSet<string> names = new HashSet<string> { "A3", "D5", "OTHER1" };
             Assert.IsTrue(names.SetEquals(sheet.GetNamesOfAllNonemptyCells()));
@@ -884,7 +1010,7 @@ namespace Tests
                 lastCells.Add("A1" + (i + 250));
             }
             Assert.IsTrue(s.SetContentsOfCell("A1249", "25.0").SetEquals(firstCells));
-            Assert.IsTrue(s.SetContentsOfCell("A1499", "0").SetEquals(lastCells)); //TODO: dependees are all the other cells, but should only be cells A1250--A1499. Possible problem GetDirectDependents?
+            Assert.IsTrue(s.SetContentsOfCell("A1499", "0").SetEquals(lastCells));
         }
         [TestMethod()]
         public void Test44()
