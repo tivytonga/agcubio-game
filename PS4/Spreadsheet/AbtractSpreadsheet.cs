@@ -30,7 +30,7 @@ using SpreadsheetUtilities;
 
 // Eric Longberg
 // CS 3500, PS5
-// October 8, 2015
+// October 15, 2015
 namespace SS
 {
     /// <summary>

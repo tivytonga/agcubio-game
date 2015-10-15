@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 // Eric Longberg
 // CS 3500, PS5
-// October 8, 2015
+// October 15, 2015
 namespace SS
 {
     /// <summary>
@@ -59,10 +59,6 @@ namespace SS
         private Dictionary<string, Cell> nameToCell;
         private DependencyGraph dependencies;
         private bool changed;
-        private string version;
-        
-        // todo: import PS4 graded tests over, use in master branch though
-        // todo: README
 
         /// <summary>
         /// Creates a new spreadsheet with no extra validity conditions, a normalizer
@@ -87,12 +83,10 @@ namespace SS
         {
             nameToCell = new Dictionary<string, Cell>();
             dependencies = new DependencyGraph();
-            this.IsValid = isValid;
-            this.Normalize = normalize;
-            this.version = version;
             changed = false;
         }
 
+        // ADDED FOR PS5
         /// <summary>
         /// Reads a spreadsheet from the given file, and uses the given validity, normalization, and version.
         /// 
@@ -108,27 +102,25 @@ namespace SS
         {
             nameToCell = new Dictionary<string, Cell>();
             dependencies = new DependencyGraph();
-            this.IsValid = isValid;
-            this.Normalize = normalize;
-            this.version = version;
 
             try
             {
+                // Setup XML settings
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.IgnoreWhitespace = true;
+                settings.IgnoreComments = true;
+                settings.IgnoreProcessingInstructions = true;
                 // Read from the given file
-                using (XmlReader reader = XmlReader.Create(filePath))
+                using (XmlReader reader = XmlReader.Create(filePath, settings))
                 {
-                    try
-                    {
-                        // ignore the <?xml version="1.0" encoding="utf-8"?> part
+
+                    // ignore the <?xml version="1.0" encoding="utf-8"?> part
+                    reader.Read();
+                    if (reader.NodeType == XmlNodeType.XmlDeclaration)
                         reader.Read();
-                    }
-                    catch
-                    {
-                        throw new SpreadsheetReadWriteException("Missing xml information or file is empty.");
-                    }
 
                     // Go through opening <spreadsheet version="version info">
-                    reader.Read();
+
                     if (reader.Name != "spreadsheet")
                         throw new SpreadsheetReadWriteException("Invalid format (first element of xml file was not \"spreadsheet\").");
 
@@ -206,14 +198,15 @@ namespace SS
                     }
                 }
             }
-            catch (InvalidOperationException e)
-            {
-                // File could not be read, line missing
-                throw new SpreadsheetReadWriteException("Invalid file format.");
-            }
+            
             catch (FileNotFoundException e)
             {
                 throw new SpreadsheetReadWriteException("File could not be found.");
+            }
+            catch
+            {
+                // File could not be read, line missing
+                throw new SpreadsheetReadWriteException("Invalid file format.");
             }
 
             // Start off as unchanged
@@ -260,6 +253,11 @@ namespace SS
                     return ((Formula)content).Evaluate(lookup);
                 }
                 return content;
+            }
+
+            public override string ToString()
+            {
+                return content.ToString();
             }
 
         }
@@ -523,7 +521,7 @@ namespace SS
                 using (XmlWriter writer = XmlWriter.Create(filename))
                 {
                     writer.WriteStartElement("spreadsheet");
-                    writer.WriteAttributeString("version", version);
+                    writer.WriteAttributeString("version", Version);
 
                     foreach (string name in GetNamesOfAllNonemptyCells())
                     {

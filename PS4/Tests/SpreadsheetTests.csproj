@@ -62,6 +62,20 @@
       <Name>Spreadsheet</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="TestXMLs\BlankContents.xml" />
+    <Content Include="TestXMLs\BlankName.xml" />
+    <Content Include="TestXMLs\CircularDependency.xml" />
+    <Content Include="TestXMLs\Correct2.xml" />
+    <Content Include="TestXMLs\Correct.xml" />
+    <Content Include="TestXMLs\EmptyFile.xml" />
+    <Content Include="TestXMLs\ExtraneousElement.xml" />
+    <Content Include="TestXMLs\InvalidXML.xml" />
+    <Content Include="TestXMLs\MissingContents.xml" />
+    <Content Include="TestXMLs\MissingName.xml" />
+    <Content Include="TestXMLs\NoVersion.xml" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
