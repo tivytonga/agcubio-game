@@ -199,21 +199,21 @@ namespace SS
                 }
             }
             
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 throw new SpreadsheetReadWriteException("File could not be found.");
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 // File could not be read, line missing
                 throw new SpreadsheetReadWriteException("Invalid file format.");
             }
-            catch (XmlException e)
+            catch (XmlException)
             {
                 // File could not be read, line missing
                 throw new SpreadsheetReadWriteException("Invalid file format.");
             }
-            catch (CircularException e)
+            catch (CircularException)
             {
                 throw new SpreadsheetReadWriteException("Circular dependency detected.");
             }

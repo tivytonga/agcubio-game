@@ -57,6 +57,8 @@
     <Content Include="Libraries\DependencyGraph.xml" />
     <Content Include="Libraries\Formula.dll" />
     <Content Include="Libraries\Formula.xml" />
+    <Content Include="Libraries\SpreadsheetPanel.dll" />
+    <Content Include="Libraries\SpreadsheetPanel.XML" />
     <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
