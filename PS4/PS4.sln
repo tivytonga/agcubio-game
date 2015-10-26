@@ -11,6 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetTests", "Tests\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetGUI", "SpreadsheetGUI\SpreadsheetGUI.csproj", "{C686835C-AE35-46FD-B545-74000669119A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", "{8239315D-6762-4780-9115-D98A5740C948}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1ECEA6F6-15CF-4F61-AAE0-32FAD47F2C26}"
+	ProjectSection(SolutionItems) = preProject
+		demo.sprd = demo.sprd
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +40,8 @@ Global
 		{C686835C-AE35-46FD-B545-74000669119A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C686835C-AE35-46FD-B545-74000669119A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C686835C-AE35-46FD-B545-74000669119A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8239315D-6762-4780-9115-D98A5740C948}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{8239315D-6762-4780-9115-D98A5740C948}.Release|Any CPU.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
