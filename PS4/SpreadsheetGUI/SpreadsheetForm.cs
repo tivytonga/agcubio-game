@@ -1,4 +1,5 @@
-﻿using SS;
+﻿using SpreadsheetUtilities;
+using SS;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -68,7 +69,18 @@ namespace SpreadsheetGUI
                 _col = col;
                 _row = row;
             }
-        
+
+            /// <summary>
+            /// Creates a cell with the name.
+            /// Throws ArgumentException if name is invalid (not in range A1->Z99).
+            /// </summary>
+            public Cell(string name)
+            {
+                if (!isValid.IsMatch(name))
+                    throw new ArgumentException();
+                this.name = name;
+            }
+
             public string name {
                 get
                 {
@@ -93,7 +105,7 @@ namespace SpreadsheetGUI
                 set
                 {
                     if (validCol(value))
-                        _col = col;
+                        _col = value;
                 }
             }
 
@@ -106,8 +118,24 @@ namespace SpreadsheetGUI
                 set
                 {
                     if (validRow(value))
-                        _row = row;
+                        _row = value;
                 }
+            }
+
+            /// <summary>
+            /// The row as 0-based.
+            /// </summary>
+            public int rowAsPanelIndex
+            {
+                get { return row - 1; }
+            }
+
+            /// <summary>
+            /// The col as 0-based.
+            /// </summary>
+            public int colAsPanelIndex
+            {
+                get { return col - 'A'; }
             }
 
             public static bool validRow(int r)
@@ -140,39 +168,120 @@ namespace SpreadsheetGUI
         /// previous cell contents.
         /// Col must be a char between A and Z, and Row an int between 1 and 99,
         /// otherwise nothing happens.
+        /// Returns true if new cell is a valid location and old cell contained valid contents.
         /// </summary>
-        private void setSelected(char col, int row)
+        private bool setSelected(char col, int row)
         {
             if (!Cell.validCol(col) || !Cell.validRow(row))
-                return;
+            {
+                spreadsheetPanel.SetSelection(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex);
+                return false;
+            }
 
-            saveCellContents();
+            if (!saveCellContents())
+            {
+                spreadsheetPanel.SetSelection(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex);
+                return false;
+            }
 
             currentCell.col = col;
             currentCell.row = row;
-            spreadsheetPanel.SetSelection(col - 'A', row - 1);
-
-            cellNameLabel.Text = currentCell.name;
-            contentsTextBox.Text = sheet.GetCellContents(currentCell.name).ToString();
-            cellValueTextBox.Text = sheet.GetCellValue(currentCell.name).ToString();
+            spreadsheetPanel.SetSelection(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex);
+            return true;
         }
 
         /// <summary>
-        /// Saves the contents of the currently selected cell in the spreadsheet.
+        /// Saves the contents of the currently selected cell in the spreadsheet,
+        /// also updating the values displayed on the grid. Returns true if this happens
+        /// succesfully, or false if an invalid formula had been entered, in which case
+        /// a MessageBox explaining this is shown.
         /// </summary>
-        private void saveCellContents()
+        private bool saveCellContents()
         {
-            sheet.SetContentsOfCell(currentCell.name, contentsTextBox.Text);
+            HashSet<string> needsUpdate;
+            try {
+                needsUpdate = new HashSet<string>(sheet.SetContentsOfCell(currentCell.name, cellContentsTextBox.Text));
+            }
+            catch (CircularException)
+            {
+                MessageBox.Show("The formula entered causes a circular dependency and is therefore invalid.", "Invalid Formula.");
+                return false;
+            }
+            catch (FormulaFormatException e)
+            {
+                MessageBox.Show(e.Message, "Invalid Formula.");
+                return false;
+            }
+            /*
+            Debug.WriteLine("Dependents:");
+            foreach (string name in needsUpdate)
+            {
+                Cell cell = new Cell(name);
+                spreadsheetPanel.SetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, getCellValue(cell));
+
+                Debug.WriteLine(cell.name);
+                string o;
+                spreadsheetPanel.GetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, out o);
+                Debug.WriteLine("Cell: "+cell.name);
+                Debug.WriteLine("Displayed value: "+o);
+                Debug.WriteLine("Internal value: "+getCellValue(cell));
+                Debug.WriteLine("");
+                
+            }
+            Debug.WriteLine("");
+            */
+            // Temporary(?) fix for an error, can achieve as follows after replacing this foreach loop with the above commented:
+            /*Click B1, contents "=A1", click B1 to update,
+			change A1 at any point, B1 does not update (and loses
+			Dependence on A1 somehow, until clicking on B1 again) */
+            foreach (string name in sheet.GetNamesOfAllNonemptyCells())
+            {
+                Cell cell = new Cell(name);
+                spreadsheetPanel.SetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, getCellValue(cell));
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Returns the value of the given cell as a string. If this is
+        /// an invalid formula, then returns the reason as a string.
+        /// </summary>
+        private string getCellValue(Cell cell)
+        {
+            object val = sheet.GetCellValue(cell.name);
+            if (val is FormulaError)
+                return ((FormulaError)val).Reason;
+            return val.ToString();
+        }
+
+        /// <summary>
+        /// Returns the contents of the given cell as a string. If this is
+        /// a Formula, then prepends "=".
+        /// </summary>
+        private string getCellContents(Cell cell)
+        {
+            object content = sheet.GetCellContents(cell.name);
+            if (content is Formula)
+                return "=" + content.ToString();
+            return content.ToString();
         }
 
         /// <summary>
         /// Called when the selected cell in the spreadsheet is changed.
+        /// Saves the previously selected cell, updates the current selection if new cell
+        /// is valid and old cell contains valid contents.
         /// </summary>
         private void SpreadsheetPanel_SelectionChanged(SpreadsheetPanel sender)
         {
             int row, col;
             sender.GetSelection(out col, out row);
-            setSelected((char)(col + 'A'), row + 1);
+            if (!setSelected((char)(col + 'A'), row + 1))
+                return;
+
+            cellNameLabel.Text = currentCell.name;
+            cellContentsTextBox.Text = getCellContents(currentCell);
+            cellValueTextBox.Text = getCellValue(currentCell);
         }
 
         /// <summary>

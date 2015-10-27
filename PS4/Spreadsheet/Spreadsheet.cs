@@ -203,6 +203,10 @@ namespace SS
             {
                 throw new SpreadsheetReadWriteException("File could not be found.");
             }
+            catch (DirectoryNotFoundException)
+            {
+                throw new SpreadsheetReadWriteException("File could not be found.");
+            }
             catch (InvalidOperationException)
             {
                 // File could not be read, line missing

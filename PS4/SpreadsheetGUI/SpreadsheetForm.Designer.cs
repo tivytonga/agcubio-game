@@ -39,12 +39,12 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.cellNameLabel = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.contentsTextBox = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
             this.cellValueTextBox = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cellContentsTextBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cellNameLabel = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -56,7 +56,7 @@
             this.spreadsheetPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.spreadsheetPanel.Location = new System.Drawing.Point(0, 33);
             this.spreadsheetPanel.Name = "spreadsheetPanel";
-            this.spreadsheetPanel.Size = new System.Drawing.Size(912, 477);
+            this.spreadsheetPanel.Size = new System.Drawing.Size(1467, 717);
             this.spreadsheetPanel.TabIndex = 0;
             this.spreadsheetPanel.Load += new System.EventHandler(this.spreadsheetPanel_Load);
             // 
@@ -68,7 +68,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(912, 33);
+            this.menuStrip1.Size = new System.Drawing.Size(1467, 33);
             this.menuStrip1.Stretch = false;
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
@@ -138,35 +138,68 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(181, 30);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(153, 30);
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // groupBox1
             // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.AutoSize = true;
             this.groupBox1.Controls.Add(this.cellValueTextBox);
             this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.contentsTextBox);
+            this.groupBox1.Controls.Add(this.cellContentsTextBox);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.cellNameLabel);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(196, 0);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(552, 52);
+            this.groupBox1.Size = new System.Drawing.Size(1271, 52);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "box";
             // 
-            // label1
+            // cellValueTextBox
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(-4, 6);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(66, 24);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Name:";
+            this.cellValueTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
+            this.cellValueTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cellValueTextBox.Location = new System.Drawing.Point(672, 3);
+            this.cellValueTextBox.Name = "cellValueTextBox";
+            this.cellValueTextBox.ReadOnly = true;
+            this.cellValueTextBox.Size = new System.Drawing.Size(441, 28);
+            this.cellValueTextBox.TabIndex = 5;
+            this.cellValueTextBox.Text = "3.14";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(602, 6);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(64, 24);
+            this.label3.TabIndex = 4;
+            this.label3.Text = "Value:";
+            // 
+            // cellContentsTextBox
+            // 
+            this.cellContentsTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
+            this.cellContentsTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cellContentsTextBox.Location = new System.Drawing.Point(202, 3);
+            this.cellContentsTextBox.Name = "cellContentsTextBox";
+            this.cellContentsTextBox.Size = new System.Drawing.Size(394, 28);
+            this.cellContentsTextBox.TabIndex = 3;
+            this.cellContentsTextBox.Text = "=3.14";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(107, 6);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(89, 24);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Contents:";
             // 
             // cellNameLabel
             // 
@@ -179,52 +212,21 @@
             this.cellNameLabel.TabIndex = 1;
             this.cellNameLabel.Text = "A1";
             // 
-            // label2
+            // label1
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(107, 6);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(89, 24);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Contents:";
-            // 
-            // contentsTextBox
-            // 
-            this.contentsTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.contentsTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.contentsTextBox.Location = new System.Drawing.Point(202, 3);
-            this.contentsTextBox.Name = "contentsTextBox";
-            this.contentsTextBox.Size = new System.Drawing.Size(124, 28);
-            this.contentsTextBox.TabIndex = 3;
-            this.contentsTextBox.Text = "=3.14";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(332, 6);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(64, 24);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Value:";
-            // 
-            // cellValueTextBox
-            // 
-            this.cellValueTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.cellValueTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cellValueTextBox.Location = new System.Drawing.Point(402, 2);
-            this.cellValueTextBox.Name = "cellValueTextBox";
-            this.cellValueTextBox.ReadOnly = true;
-            this.cellValueTextBox.Size = new System.Drawing.Size(100, 28);
-            this.cellValueTextBox.TabIndex = 5;
-            this.cellValueTextBox.Text = "3.14";
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(-4, 6);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(66, 24);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Name:";
             // 
             // SpreadsheetForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(912, 510);
+            this.ClientSize = new System.Drawing.Size(1467, 750);
             this.Controls.Add(this.spreadsheetPanel);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
@@ -254,7 +256,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TextBox cellValueTextBox;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox contentsTextBox;
+        private System.Windows.Forms.TextBox cellContentsTextBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label cellNameLabel;
         private System.Windows.Forms.Label label1;
