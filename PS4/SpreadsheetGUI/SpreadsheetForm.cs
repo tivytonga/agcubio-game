@@ -302,7 +302,19 @@ namespace SpreadsheetGUI
         /// </summary>
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Create an instance of the open file dialog box
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
+            // Set filter for types of files allowed to open
+            openFileDialog1.Filter = "Spreadsheet Files (.sprd)|*.sprd|All Files(*.*)|*.*";
+            openFileDialog1.FilterIndex = 1;
+
+            // Select only one file to open 
+            // Can allow user to open multiple files at a time by setting to "true"
+            openFileDialog1.Multiselect = false;
+
+            // Call ShowDialog method to show the dialog box
+            openFileDialog1.ShowDialog();
         }
 
         /// <summary>
