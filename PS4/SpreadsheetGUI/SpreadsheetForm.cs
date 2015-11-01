@@ -308,9 +308,6 @@ namespace SpreadsheetGUI
         /// </summary>
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Option to save current spreadsheet before opening a new spreadsheet
-            bool saveCurrentSpreadsheet = false;
-
             // Create an instance of the open file dialog box
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
@@ -344,6 +341,9 @@ namespace SpreadsheetGUI
                 MessageBoxIcon icon = MessageBoxIcon.Warning;
                 DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
 
+                // Name of file user wants to open
+                string filename = openFileDialog.FileName;
+
                 // Perform actions based on the button user chooses
                 switch (userResult)
                 {
@@ -368,15 +368,6 @@ namespace SpreadsheetGUI
                             break;
                         }
                 }
-
-
-                string filename = openFileDialog.FileName;
-
-                // TODO fix this code. Unsure how to open a chosen file.
-                // Open the chosen Spreadsheet file 
-                Spreadsheet openSpreadsheet = new Spreadsheet(filename, s=>true, s=>s, "ps6");
-
-                //Spreadsheet openFile = new Spreadsheet(filename,s=>true,s=>s,"default");
             }
 
         }
