@@ -155,10 +155,36 @@ namespace SpreadsheetGUI
             }
         }
 
-
+        /// <summary>
+        /// Loads a spreadsheet from a file
+        /// </summary>
         private void spreadsheetPanel_Load(object sender, EventArgs e)
         {
+            try {
+                // Open chosen Spreadsheet file
+                sheet = new Spreadsheet(this.filename, s => true, s => s, "");
 
+                // Clear the current Spreadsheet file
+                spreadsheetPanel.Clear();
+
+                // Read through the Spreadsheet file
+                foreach (string cell in sheet.GetNamesOfAllNonemptyCells())
+                {
+                    // Set the name of the cell
+                    cellNameLabel.Text = cell;
+
+                    // Set the contents of the cell
+                    cellContentsTextBox.Text = sheet.GetCellContents(cell).ToString();
+
+                    // Set the value of the cell
+                    cellValueTextBox.Text = sheet.GetCellValue(cell).ToString();
+
+                }
+            }
+            catch(Exception)
+            {
+
+            }
         }
 
         /// <summary>
@@ -296,6 +322,13 @@ namespace SpreadsheetGUI
         /// </summary>
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // If user hits the keys "CTRL + N"
+            // Tell the application context to run the form on the same
+            // thread as the other forms.
+            KeyEventArgs keyStroke = new KeyEventArgs(Keys.Control);
+            if (keyStroke.Control && keyStroke.KeyCode == Keys.N)
+                SpreadsheetAppContext.getAppContext().RunForm(new SpreadsheetForm());
+
             // Tell the application context to run the form on the same
             // thread as the other forms.
             SpreadsheetAppContext.getAppContext().RunForm(new SpreadsheetForm());
@@ -308,6 +341,9 @@ namespace SpreadsheetGUI
         /// </summary>
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Keeps track of whether user wants to open a chosen Spreadsheet file
+            bool openSpreadsheet = false;
+
             // Create an instance of the open file dialog box
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
@@ -340,16 +376,14 @@ namespace SpreadsheetGUI
                 MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
                 MessageBoxIcon icon = MessageBoxIcon.Warning;
                 DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
-
-                // Name of file user wants to open
-                string filename = openFileDialog.FileName;
-
+                
                 // Perform actions based on the button user chooses
                 switch (userResult)
                 {
                     // User selects Yes: Save current Spreadsheet and then open the chosen file
                     case DialogResult.Yes:
                         {
+                            openSpreadsheet = true;
                             saveToolStripMenuItem_Click(sender, e);
                             // TODO Open selected Spreadsheet file
                             break;
@@ -358,6 +392,7 @@ namespace SpreadsheetGUI
                     // User selects No: Close current Spreadsheet. Open selected Spreadsheet file
                     case DialogResult.No:
                         {
+                            openSpreadsheet = true;
                             closeToolStripMenuItem_Click(sender, e);
                             // TODO Open selected Spreadsheet file
                             break;
@@ -367,6 +402,25 @@ namespace SpreadsheetGUI
                         { 
                             break;
                         }
+                }
+
+                // Name of file user wants to open
+                this.filename = openFileDialog.FileName;
+
+                // Open the user's chosen Spreadsheet file
+                if (openSpreadsheet)
+                {
+                    spreadsheetPanel_Load(sender, e);
+
+                    // Open chosen Spreadsheet file
+                    //sheet = new Spreadsheet(openFileDialog.FileName, s => true, s => s, "ps6");
+
+                    // Clear the current Spreadsheet file
+                    //spreadsheetPanel.Clear();
+
+                    // Read through the Spreadsheet file
+
+
                 }
             }
 
@@ -389,6 +443,47 @@ namespace SpreadsheetGUI
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+            // Create an instance of the save file dialog box
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+
+            // If user hits the keys "CTRL + S"
+            KeyEventArgs keyStroke = new KeyEventArgs(Keys.Control);
+
+            if (keyStroke.Control && keyStroke.KeyCode == Keys.S)
+                saveFileDialog.ShowDialog();
+
+            // Set filter for saving a Spreadsheet
+            saveFileDialog.Filter = "Spreadsheet Files (.sprd)|*.sprd|All Files(*.*)|*.*";
+            saveFileDialog.FilterIndex = 1;
+            saveFileDialog.Title = "Save Spreadsheet As...";
+            
+            // Call ShowDialog method to show the dialog box and keep track of user's actions
+            //   (they click 'OK' or 'Cancel'
+            DialogResult userActions = saveFileDialog.ShowDialog();
+
+            // TODO Save the file
+            // if the filename does not end with .sprd
+            if (saveFileDialog.FileName != "")
+            {
+                string saveFilename = saveFileDialog.FileName;
+
+                switch(saveFileDialog.FilterIndex)
+                {
+                    case 1:
+                        {
+                            if (!saveFilename.EndsWith(".sprd"))
+                                saveFilename += ".sprd";
+                            sheet.Save(saveFilename);
+                            break;
+                        }
+                    case 2:
+                        {
+                            sheet.Save(saveFilename);
+                            break;
+                        }
+                }
+            }
+            
         }
 
         /// <summary>
@@ -400,5 +495,6 @@ namespace SpreadsheetGUI
         {
 
         }
+
     }
 }
