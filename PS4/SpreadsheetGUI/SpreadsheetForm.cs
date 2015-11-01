@@ -308,16 +308,18 @@ namespace SpreadsheetGUI
         /// </summary>
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Option to save current spreadsheet before opening a new spreadsheet
+            bool saveCurrentSpreadsheet = false;
+
             // Create an instance of the open file dialog box
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
 
-            // Set filter for types of files allowed to open
-            openFileDialog1.Filter = "Spreadsheet Files (.sprd)|*.sprd|All Files(*.*)|*.*";
-            openFileDialog1.FilterIndex = 1;
-
-            // Select only one file to open 
-            // Can allow user to open multiple files at a time by setting to "true"
-            openFileDialog1.Multiselect = false;
+            // Set filter for types of files allowed to open,
+            //    title of the dialog, and multiselection option
+            openFileDialog.Filter = "Spreadsheet Files (.sprd)|*.sprd|All Files(*.*)|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.Title = "Select a Spreadsheet file to open";
+            openFileDialog.Multiselect = false;
 
             // Need to check if current Spreadsheet has been saved before opening a new Spreadsheet
 
@@ -325,20 +327,54 @@ namespace SpreadsheetGUI
             KeyEventArgs keyStroke = new KeyEventArgs(Keys.Control);
             
             if (keyStroke.Control && keyStroke.KeyCode == Keys.O)
-                openFileDialog1.ShowDialog();
+                openFileDialog.ShowDialog();
 
             // Call ShowDialog method to show the dialog box and keep track of user's actions
             //   (they click 'OK' or 'Cancel'
-            DialogResult userActions = openFileDialog1.ShowDialog();
+            DialogResult userActions = openFileDialog.ShowDialog();
 
-            // User clicks 'OK'
+            // User chooses a file and clicks "OK" (Actually shows up as "Open" on button)
             if (userActions == DialogResult.OK)
             {
-                string filename = openFileDialog1.FileName;
+                // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
+                // Set up the look of the message box, message, and buttons
+                string prompt = "There are unsaved changes in your Spreadsheet. Would you like to save " +
+                                    "current changes before opening a new Spreadsheet?";
+                MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
+                MessageBoxIcon icon = MessageBoxIcon.Warning;
+                DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
+
+                // Perform actions based on the button user chooses
+                switch (userResult)
+                {
+                    // User selects Yes: Save current Spreadsheet and then open the chosen file
+                    case DialogResult.Yes:
+                        {
+                            saveToolStripMenuItem_Click(sender, e);
+                            // TODO Open selected Spreadsheet file
+                            break;
+                        }
+
+                    // User selects No: Close current Spreadsheet. Open selected Spreadsheet file
+                    case DialogResult.No:
+                        {
+                            closeToolStripMenuItem_Click(sender, e);
+                            // TODO Open selected Spreadsheet file
+                            break;
+                        }
+                    // User selects Cancel: Close out message box. Do not save or open a new Spreadsheet.
+                    case DialogResult.Cancel:
+                        { 
+                            break;
+                        }
+                }
+
+
+                string filename = openFileDialog.FileName;
 
                 // TODO fix this code. Unsure how to open a chosen file.
                 // Open the chosen Spreadsheet file 
-                SpreadsheetAppContext.getAppContext().RunForm(new SpreadsheetForm(filename));
+                Spreadsheet openSpreadsheet = new Spreadsheet(filename, s=>true, s=>s, "ps6");
 
                 //Spreadsheet openFile = new Spreadsheet(filename,s=>true,s=>s,"default");
             }
