@@ -30,6 +30,7 @@ namespace SpreadsheetGUI
         /// Regex to match possible cells A1->Z99.
         /// </summary>
         protected static Regex isValid = new Regex(@"^[A-Z][1-9][0-9]{0,1}$");
+        private string filename;
 
         /// <summary>
         /// Creates a new blank SpreadsheetForm.
@@ -47,6 +48,11 @@ namespace SpreadsheetGUI
             setSelected('A', 1);
 
             setTitle("Spreadsheet");
+        }
+
+        public SpreadsheetForm(string filename)
+        {
+            this.filename = filename;
         }
 
 
@@ -313,8 +319,30 @@ namespace SpreadsheetGUI
             // Can allow user to open multiple files at a time by setting to "true"
             openFileDialog1.Multiselect = false;
 
-            // Call ShowDialog method to show the dialog box
-            openFileDialog1.ShowDialog();
+            // Need to check if current Spreadsheet has been saved before opening a new Spreadsheet
+
+            // If user hits the keys "CTRL + O"
+            KeyEventArgs keyStroke = new KeyEventArgs(Keys.Control);
+            
+            if (keyStroke.Control && keyStroke.KeyCode == Keys.O)
+                openFileDialog1.ShowDialog();
+
+            // Call ShowDialog method to show the dialog box and keep track of user's actions
+            //   (they click 'OK' or 'Cancel'
+            DialogResult userActions = openFileDialog1.ShowDialog();
+
+            // User clicks 'OK'
+            if (userActions == DialogResult.OK)
+            {
+                string filename = openFileDialog1.FileName;
+
+                // TODO fix this code. Unsure how to open a chosen file.
+                // Open the chosen Spreadsheet file 
+                SpreadsheetAppContext.getAppContext().RunForm(new SpreadsheetForm(filename));
+
+                //Spreadsheet openFile = new Spreadsheet(filename,s=>true,s=>s,"default");
+            }
+
         }
 
         /// <summary>
