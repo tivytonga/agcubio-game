@@ -43,7 +43,7 @@ namespace SpreadsheetGUI
         private void setTitle(string name)
         {
             string title = "Spreadsheet";
-            if (name != "")
+            if (name != "" && name != null)
                 title += " -- " + name;
             Text = title;
         }
@@ -73,14 +73,12 @@ namespace SpreadsheetGUI
             sheet = new Spreadsheet(s => isValid.IsMatch(s), s => s.ToUpper(), "ps6");
 
             spreadsheetPanel.SelectionChanged += SpreadsheetPanel_SelectionChanged;
+            cellContentsTextBox.PreviewKeyDown += CellContentsTextBox_PreviewKeyDown;
 
             currentCell = new Cell('A', 1);
             setSelected('A', 1);
-
             setTitle("");
-            cellContentsTextBox.KeyDown += CellContentsTextBox_KeyDown;
         }
-
 
         public SpreadsheetForm(string filename)
         {
@@ -419,7 +417,7 @@ namespace SpreadsheetGUI
         /// If movement would result in an invalid cell, then no movement will occur.
         /// In any of the above cases, attempts to save the contents in the cell.
         /// </summary>
-        private void CellContentsTextBox_KeyDown(object sender, KeyEventArgs e)
+        private void CellContentsTextBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
             if (e.Shift && e.KeyCode == Keys.Enter)
                 MoveRelative(Keys.Up);

@@ -157,9 +157,8 @@
             this.groupBox1.Location = new System.Drawing.Point(196, 0);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(1271, 52);
-            this.groupBox1.TabIndex = 0;
+            this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "box";
             // 
             // cellValueTextBox
             // 
@@ -203,12 +202,11 @@
             // 
             // cellNameLabel
             // 
-            this.cellNameLabel.AutoSize = true;
             this.cellNameLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             this.cellNameLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cellNameLabel.Location = new System.Drawing.Point(68, 6);
             this.cellNameLabel.Name = "cellNameLabel";
-            this.cellNameLabel.Size = new System.Drawing.Size(33, 24);
+            this.cellNameLabel.Size = new System.Drawing.Size(40, 24);
             this.cellNameLabel.TabIndex = 1;
             this.cellNameLabel.Text = "A1";
             // 
