@@ -335,7 +335,7 @@ namespace SS
         {
             if (nameToCell.ContainsKey(name))
             {
-                Object contents = GetCellContents(name);
+                object contents = GetCellContents(name);
                 if (contents is Formula)
                 {
                     foreach (string dependee in ((Formula)contents).GetVariables())
@@ -353,14 +353,19 @@ namespace SS
         /// Checks a name is valid and not null, sets the cell's contents, and returns
         /// the set of dependents.
         /// </summary>
-        private ISet<string> SetCell(string name, Object content)
+        private ISet<string> SetCell(string name, object content)
         {
             checkValidName(name);
+            object oldContent = GetCellContents(name);
+            if (content.GetType() == oldContent.GetType() && oldContent.ToString() == content.ToString())
+                return new HashSet<string>(GetCellsToRecalculate(name));
+
             Remove(name);
             // If non-empty, we will add it
             if (!(content is string && (string)content == ""))
             {
                 nameToCell.Add(name, new Cell(content));
+                Changed = true;
             }
 
             return new HashSet<string>(GetCellsToRecalculate(name));
@@ -420,6 +425,9 @@ namespace SS
             if (formula == null)
                 throw new ArgumentNullException();
             checkValidName(name);
+            object oldContent = GetCellContents(name);
+            if (oldContent is Formula && formula == (Formula)oldContent)
+                return new HashSet<string>(GetCellsToRecalculate(name));
 
             // Test if putting this Formula into the given cell will cause a CircularException.
             foreach (string dependent in GetCellsToRecalculate(name))
@@ -438,6 +446,7 @@ namespace SS
             }
             Remove(name);
             nameToCell.Add(name, new Cell(formula));
+            Changed = true;
             return new HashSet<string>(GetCellsToRecalculate(name));
         }
 
@@ -582,6 +591,7 @@ namespace SS
 
                     writer.WriteEndElement();
                 }
+                Changed = false;
             }
             catch (Exception e)
             {
@@ -646,8 +656,6 @@ namespace SS
             name = Normalize(name);
             if (!IsValid(name))
                 throw new InvalidNameException();
-
-            Changed = true;
             
             double d;
             if (Double.TryParse(content, out d))

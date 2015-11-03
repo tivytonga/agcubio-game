@@ -169,7 +169,6 @@
             this.cellValueTextBox.ReadOnly = true;
             this.cellValueTextBox.Size = new System.Drawing.Size(441, 28);
             this.cellValueTextBox.TabIndex = 5;
-            this.cellValueTextBox.Text = "3.14";
             // 
             // label3
             // 
@@ -189,7 +188,6 @@
             this.cellContentsTextBox.Name = "cellContentsTextBox";
             this.cellContentsTextBox.Size = new System.Drawing.Size(394, 28);
             this.cellContentsTextBox.TabIndex = 3;
-            this.cellContentsTextBox.Text = "=3.14";
             // 
             // label2
             // 

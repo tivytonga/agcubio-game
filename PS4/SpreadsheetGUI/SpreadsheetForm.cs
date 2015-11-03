@@ -30,6 +30,36 @@ namespace SpreadsheetGUI
         /// Regex to match possible cells A1->Z99.
         /// </summary>
         protected static Regex isValid = new Regex(@"^[A-Z][1-9][0-9]{0,1}$");
+
+        /// <summary>
+        /// True if the underlying spreadsheet has been changed.
+        /// </summary>
+        private bool Changed { get { return sheet.Changed; } }
+
+        /// <summary>
+        /// Sets the title of this spreadsheet as "Spreadsheet -- filename" where
+        /// filename is the provided string. An empty string will result in "Spreadsheet". 
+        /// </summary>
+        private void setTitle(string name)
+        {
+            string title = "Spreadsheet";
+            if (name != "")
+                title += " -- " + name;
+            Text = title;
+        }
+
+        /// <summary>
+        /// If the spreadsheet has changed since being opened or saved, ensures an asterisk * appears
+        /// at the end of the title. If a file has not been changed, ensures the opposite.
+        /// </summary>
+        private void checkTitleChanged()
+        {
+            if (Changed && Text[Text.Length - 1] != '*')
+                Text += "*";
+            else if (!Changed)
+                setTitle(filename);
+        }
+
         private string filename;
 
         /// <summary>
@@ -47,12 +77,13 @@ namespace SpreadsheetGUI
             currentCell = new Cell('A', 1);
             setSelected('A', 1);
 
-            setTitle("Spreadsheet");
+            setTitle("");
         }
 
         public SpreadsheetForm(string filename)
         {
             this.filename = filename;
+            setTitle(filename);
         }
 
 
@@ -188,14 +219,6 @@ namespace SpreadsheetGUI
         }
 
         /// <summary>
-        /// Sets the title of this spreadsheet.
-        /// </summary>
-        private void setTitle(string title)
-        {
-            Text = title;
-        }
-
-        /// <summary>
         /// Sets the currently selected cell to the given col, row pair, saving the
         /// previous cell contents.
         /// Col must be a char between A and Z, and Row an int between 1 and 99,
@@ -302,7 +325,7 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Called when the selected cell in the spreadsheet is changed.
         /// Saves the previously selected cell, updates the current selection if new cell
-        /// is valid and old cell contains valid contents.
+        /// is valid and old cell contains valid contents. Updates the title if a change has occurred.
         /// </summary>
         private void SpreadsheetPanel_SelectionChanged(SpreadsheetPanel sender)
         {
@@ -311,6 +334,7 @@ namespace SpreadsheetGUI
             if (!setSelected((char)(col + 'A'), row + 1))
                 return;
 
+            checkTitleChanged();
             cellNameLabel.Text = currentCell.name;
             cellContentsTextBox.Text = getCellContents(currentCell);
             cellValueTextBox.Text = getCellValue(currentCell);
@@ -369,6 +393,8 @@ namespace SpreadsheetGUI
             // User chooses a file and clicks "OK" (Actually shows up as "Open" on button)
             if (userActions == DialogResult.OK)
             {
+
+                //TODO only show message if spreadsheet changed
                 // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
                 // Set up the look of the message box, message, and buttons
                 string prompt = "There are unsaved changes in your Spreadsheet. Would you like to save " +
@@ -467,7 +493,7 @@ namespace SpreadsheetGUI
             {
                 string saveFilename = saveFileDialog.FileName;
 
-                switch(saveFileDialog.FilterIndex)
+                switch (saveFileDialog.FilterIndex)
                 {
                     case 1:
                         {
@@ -482,6 +508,10 @@ namespace SpreadsheetGUI
                             break;
                         }
                 }
+
+                setTitle(saveFilename);
+                filename = saveFilename;
+                checkTitleChanged();
             }
             
         }
@@ -489,8 +519,6 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Called when the About button is pressed.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
