@@ -78,12 +78,13 @@ namespace SpreadsheetGUI
             setSelected('A', 1);
 
             setTitle("");
+            cellContentsTextBox.KeyDown += CellContentsTextBox_KeyDown;
         }
+
 
         public SpreadsheetForm(string filename)
         {
             this.filename = filename;
-            setTitle(filename);
         }
 
 
@@ -118,6 +119,9 @@ namespace SpreadsheetGUI
                 this.name = name;
             }
 
+            /// <summary>
+            /// The name, e.g. B12
+            /// </summary>
             public string name {
                 get
                 {
@@ -134,6 +138,10 @@ namespace SpreadsheetGUI
                 }
 
             }
+
+            /// <summary>
+            /// The column, like "C13" --> 'C'
+            /// </summary>
             public char col {
                 get
                 {
@@ -146,6 +154,9 @@ namespace SpreadsheetGUI
                 }
             }
 
+            /// <summary>
+            /// The row, like "C13" --> 13
+            /// </summary>
             public int row
             {
                 get
@@ -175,11 +186,17 @@ namespace SpreadsheetGUI
                 get { return col - 'A'; }
             }
 
+            /// <summary>
+            /// True if row between 1 and 99 inclusive.
+            /// </summary>
             public static bool validRow(int r)
             {
                 return (r >= 1 && r <= 99);
             }
 
+            /// <summary>
+            /// True is col between 'A' and 'Z' inclusive.
+            /// </summary>
             public static bool validCol(char c)
             {
                 return (c >= 'A' && c <= 'Z');
@@ -331,13 +348,102 @@ namespace SpreadsheetGUI
         {
             int row, col;
             sender.GetSelection(out col, out row);
-            if (!setSelected((char)(col + 'A'), row + 1))
+            ChangeSelection((char)(col + 'A'), row + 1);
+        }
+
+        /// <summary>
+        /// Call to move current cell to given col, row pair and update and save the previous cell.
+        /// </summary>
+        private void ChangeSelection(char col, int row)
+        {
+            if (!setSelected(col, row))
                 return;
 
             checkTitleChanged();
             cellNameLabel.Text = currentCell.name;
             cellContentsTextBox.Text = getCellContents(currentCell);
             cellValueTextBox.Text = getCellValue(currentCell);
+            cellContentsTextBox.Focus();
+        }
+
+        /// <summary>
+        /// Saves the current contents and moves the selection in the given direction
+        /// (up, down, left, right) if possible.
+        /// </summary>
+        private void MoveRelative(Keys dir)
+        {
+            char oldCol = currentCell.col;
+            int oldRow = currentCell.row;
+            char newCol = oldCol;
+            int newRow = oldRow;
+            switch (dir)
+            {
+                case Keys.Up:
+                    newRow = oldRow - 1;
+                    if (!Cell.validRow(newRow))
+                        newRow = oldRow;
+                    break;
+
+                case Keys.Down:
+                    newRow = oldRow + 1;
+                    if (!Cell.validRow(newRow))
+                        newRow = oldRow;
+                    break;
+
+                case Keys.Left:
+                    newCol = (char)(oldCol - 1);
+                    if (!Cell.validCol(newCol))
+                        newCol = oldCol;
+                    break;
+
+                case Keys.Right:
+                    newCol = (char)(oldCol + 1);
+                    if (!Cell.validCol(newCol))
+                        newCol = oldCol;
+                    break;
+
+                default: // Invalid Key
+                    return;
+            }
+
+            ChangeSelection(newCol, newRow);
+        }
+
+
+        /// <summary>
+        /// Called upon a KeyDown event in the cellContentsTextBox.
+        /// If key code is Enter, move to the next cell downwards.
+        /// If key code is Tab, move to the next cell rightwards.
+        /// If Shift key is also pressed, then these movements are reversed.
+        /// If Shift and an arrow key is pressed, moves in the pressed direction.
+        /// If movement would result in an invalid cell, then no movement will occur.
+        /// In any of the above cases, attempts to save the contents in the cell.
+        /// </summary>
+        private void CellContentsTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Shift && e.KeyCode == Keys.Enter)
+                MoveRelative(Keys.Up);
+            else if (e.KeyCode == Keys.Enter)
+                MoveRelative(Keys.Down);
+            else if (e.Shift && e.KeyCode == Keys.Tab)
+                MoveRelative(Keys.Left);
+            else if (e.KeyCode == Keys.Tab)
+                MoveRelative(Keys.Right);
+            else if (e.Shift)
+            {
+                switch (e.KeyCode)
+                {
+                    case Keys.Up:
+                    case Keys.Down:
+                    case Keys.Left:
+                    case Keys.Right:
+                        MoveRelative(e.KeyCode);
+                        break;
+
+                    default:
+                        return;
+                }
+            }
         }
 
         /// <summary>
@@ -523,6 +629,5 @@ namespace SpreadsheetGUI
         {
 
         }
-
     }
 }
