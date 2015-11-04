@@ -29,14 +29,14 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SpreadsheetForm));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint1 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 15D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint2 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(1D, 15D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint3 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(2D, 20D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint4 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(3D, 2D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint5 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(-1D, 10D);
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint6 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 15D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint7 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(1D, 15D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint8 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(2D, 20D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint9 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(3D, 2D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint10 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(-1D, 10D);
             this.spreadsheetPanel = new SS.SpreadsheetPanel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,6 +54,7 @@
             this.cellNameLabel = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart)).BeginInit();
@@ -69,7 +70,6 @@
             this.spreadsheetPanel.Size = new System.Drawing.Size(1467, 717);
             this.spreadsheetPanel.TabIndex = 1;
             this.spreadsheetPanel.TabStop = false;
-            this.spreadsheetPanel.Load += new System.EventHandler(this.spreadsheetPanel_Load);
             // 
             // menuStrip1
             // 
@@ -149,7 +149,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(181, 30);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(153, 30);
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -232,24 +232,24 @@
             // 
             // chart
             // 
-            chartArea1.Name = "ChartArea1";
-            this.chart.ChartAreas.Add(chartArea1);
-            legend1.Enabled = false;
-            legend1.Name = "Legend1";
-            this.chart.Legends.Add(legend1);
+            chartArea2.Name = "ChartArea1";
+            this.chart.ChartAreas.Add(chartArea2);
+            legend2.Enabled = false;
+            legend2.Name = "Legend1";
+            this.chart.Legends.Add(legend2);
             this.chart.Location = new System.Drawing.Point(398, 93);
             this.chart.Name = "chart";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series1.CustomProperties = "IsXAxisQuantitative=False";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            series1.Points.Add(dataPoint1);
-            series1.Points.Add(dataPoint2);
-            series1.Points.Add(dataPoint3);
-            series1.Points.Add(dataPoint4);
-            series1.Points.Add(dataPoint5);
-            this.chart.Series.Add(series1);
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.CustomProperties = "IsXAxisQuantitative=False";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            series2.Points.Add(dataPoint6);
+            series2.Points.Add(dataPoint7);
+            series2.Points.Add(dataPoint8);
+            series2.Points.Add(dataPoint9);
+            series2.Points.Add(dataPoint10);
+            this.chart.Series.Add(series2);
             this.chart.Size = new System.Drawing.Size(394, 340);
             this.chart.TabIndex = 2;
             this.chart.TabStop = false;
@@ -296,6 +296,7 @@
         private System.Windows.Forms.Label cellNameLabel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 
