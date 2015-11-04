@@ -2,15 +2,10 @@
 using SS;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace SpreadsheetGUI
 {
@@ -25,6 +20,11 @@ namespace SpreadsheetGUI
         /// Represents the location of the currently selected cell (A1->Z99)
         /// </summary>
         Cell currentCell;
+
+        /// <summary>
+        /// Handles the data plotting.
+        /// </summary>
+        Graph graph;
 
         /// <summary>
         /// Regex to match possible cells A1->Z99.
@@ -75,6 +75,9 @@ namespace SpreadsheetGUI
             spreadsheetPanel.SelectionChanged += SpreadsheetPanel_SelectionChanged;
             cellContentsTextBox.PreviewKeyDown += CellContentsTextBox_PreviewKeyDown;
 
+            graph = new Graph(chart);
+            chart.Visible = false;
+
             currentCell = new Cell('A', 1);
             setSelected('A', 1);
             setTitle("");
@@ -84,6 +87,69 @@ namespace SpreadsheetGUI
         {
             this.filename = filename;
         }
+
+        /// <summary>
+        /// Class for handling graphing data.
+        /// </summary>
+        private class Graph{
+            private Chart chart;
+            private DataPointCollection points;
+            private SortedSet<double> xVals;
+            
+            /// <summary>
+            /// Starts our graph using the underlying Chart.
+            /// </summary>
+            public Graph(Chart c)
+            {
+                chart = c;
+                points = c.Series[0].Points;
+                xVals = new SortedSet<double>();
+                Clear();
+            }
+
+            /// <summary>
+            /// Clears the graph of any data points.
+            /// </summary>
+            public void Clear()
+            {
+                points.Clear();
+                xVals.Clear();
+            }
+
+            /// <summary>
+            /// Sets the graph data to be all direct x,y pairs from the given data that are both doubles (as strings) and not already in the graph.
+            /// If one set is bigger than the other, the corresponding elements without matches are not graphed.
+            /// </summary>
+            public void SetData(List<string> xData, List<string> yData)
+            {
+                Clear();
+                Dictionary<double, double> data = new Dictionary<double, double>();
+                
+                for (int i = 0; i < xData.Count; i++)
+                {
+                    double xDub, yDub;
+                    if (Double.TryParse(xData[i], out xDub) && Double.TryParse(yData[i], out yDub))
+                    {
+                        data.Add(xDub, yDub);
+                        xVals.Add(xDub);
+                    }
+                }
+
+                foreach (double x in xVals)
+                {
+                    points.AddXY(x, data[x]);
+                }
+            }
+
+            /// <summary>
+            /// Toggles the visibility of the graph.
+            /// </summary>
+            public void ToggleVisible()
+            {
+                chart.Visible = !chart.Visible;
+            }
+        }
+
 
 
         /// <summary>
@@ -307,10 +373,31 @@ namespace SpreadsheetGUI
             foreach (string name in sheet.GetNamesOfAllNonemptyCells())
             {
                 Cell cell = new Cell(name);
-                spreadsheetPanel.SetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, getCellValue(cell));
+                string val = getCellValue(cell);
+                spreadsheetPanel.SetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, val);
+            }
+            spreadsheetPanel.SetValue(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex, getCellValue(currentCell));
+
+            updateGraph();
+            
+            return true;
+        }
+
+        /// <summary>
+        /// Updates the graph with all data from columns A and B.
+        /// </summary>
+        private void updateGraph()
+        {
+            List<string> xData = new List<string>();
+            List<string> yData = new List<string>();
+            
+            for (int row = 1; row < 100; row ++)
+            {
+                xData.Add(getCellValue(new Cell('A', row)));
+                yData.Add(getCellValue(new Cell('B', row)));
             }
 
-            return true;
+            graph.SetData(xData, yData);
         }
 
         /// <summary>
@@ -410,12 +497,15 @@ namespace SpreadsheetGUI
 
         /// <summary>
         /// Called upon a KeyDown event in the cellContentsTextBox.
+        /// 
         /// If key code is Enter, move to the next cell downwards.
         /// If key code is Tab, move to the next cell rightwards.
         /// If Shift key is also pressed, then these movements are reversed.
         /// If Shift and an arrow key is pressed, moves in the pressed direction.
         /// If movement would result in an invalid cell, then no movement will occur.
         /// In any of the above cases, attempts to save the contents in the cell.
+        /// 
+        /// If F3 is pressed, the visibility of the graph is toggled.
         /// </summary>
         private void CellContentsTextBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
@@ -442,6 +532,8 @@ namespace SpreadsheetGUI
                         return;
                 }
             }
+            else if (e.KeyCode == Keys.F3)
+                    graph.ToggleVisible();
         }
 
         /// <summary>
