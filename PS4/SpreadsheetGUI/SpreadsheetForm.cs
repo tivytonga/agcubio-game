@@ -351,10 +351,10 @@ namespace SpreadsheetGUI
             //    title of the dialog, and multiselection option
             openFileDialog.Filter = "Spreadsheet Files (.sprd)|*.sprd|All Files(*.*)|*.*";
             openFileDialog.FilterIndex = 1;
-            openFileDialog.Title = "Select a Spreadsheet file to open";
+            openFileDialog.Title = "Open Spreadsheet...";
             openFileDialog.Multiselect = false;
 
-            // Need to check if current Spreadsheet has been saved before opening a new Spreadsheet
+            // TODO Need to check if current Spreadsheet has been saved before opening a new Spreadsheet
 
             // If user hits the keys "CTRL + O"
             KeyEventArgs keyStroke = new KeyEventArgs(Keys.Control);
@@ -366,17 +366,16 @@ namespace SpreadsheetGUI
             //   (they click 'OK' or 'Cancel'
             DialogResult userActions = openFileDialog.ShowDialog();
 
-            // User chooses a file and clicks "OK" (Actually shows up as "Open" on button)
-            if (userActions == DialogResult.OK)
+            if (sheet.Changed)
             {
                 // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
                 // Set up the look of the message box, message, and buttons
                 string prompt = "There are unsaved changes in your Spreadsheet. Would you like to save " +
-                                    "current changes before opening a new Spreadsheet?";
+                                "current changes before opening a new Spreadsheet?";
                 MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
                 MessageBoxIcon icon = MessageBoxIcon.Warning;
                 DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
-                
+
                 // Perform actions based on the button user chooses
                 switch (userResult)
                 {
@@ -399,28 +398,32 @@ namespace SpreadsheetGUI
                         }
                     // User selects Cancel: Close out message box. Do not save or open a new Spreadsheet.
                     case DialogResult.Cancel:
-                        { 
+                        {
                             break;
                         }
                 }
 
-                // Name of file user wants to open
-                this.filename = openFileDialog.FileName;
-
-                // Open the user's chosen Spreadsheet file
-                if (openSpreadsheet)
+                // User chooses a file and clicks "OK" (Actually shows up as "Open" on button)
+                if (userActions == DialogResult.OK)
                 {
-                    spreadsheetPanel_Load(sender, e);
+                    // Name of file user wants to open
+                    this.filename = openFileDialog.FileName;
 
-                    // Open chosen Spreadsheet file
-                    //sheet = new Spreadsheet(openFileDialog.FileName, s => true, s => s, "ps6");
+                    // Open the user's chosen Spreadsheet file
+                    if (openSpreadsheet)
+                    {
+                        spreadsheetPanel_Load(sender, e);
 
-                    // Clear the current Spreadsheet file
-                    //spreadsheetPanel.Clear();
+                        // Open chosen Spreadsheet file
+                        //sheet = new Spreadsheet(openFileDialog.FileName, s => true, s => s, "ps6");
 
-                    // Read through the Spreadsheet file
+                        // Clear the current Spreadsheet file
+                        //spreadsheetPanel.Clear();
+
+                        // Read through the Spreadsheet file
 
 
+                    }
                 }
             }
 
