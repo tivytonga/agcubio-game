@@ -202,35 +202,38 @@ namespace SpreadsheetGUI
         }
 
         /// <summary>
-        /// Loads a spreadsheet from a file
+        /// Loads a spreadsheet from a file.
         /// </summary>
         private void spreadsheetPanel_Load(object sender, EventArgs e)
         {
-            try {
-                // Open chosen Spreadsheet file
-                sheet = new Spreadsheet(this.filename, s => true, s => s, "");
-
+            IEnumerable<string> openSpreadsheetCells = sheet.GetNamesOfAllNonemptyCells();
+            try
+            {
                 // Clear the current Spreadsheet file
                 spreadsheetPanel.Clear();
 
                 // Read through the Spreadsheet file
-                foreach (string cell in sheet.GetNamesOfAllNonemptyCells())
+                foreach (string cell in openSpreadsheetCells)
                 {
-                    // Set the name of the cell
+                    // Set the name of current cell
                     cellNameLabel.Text = cell;
 
-                    // Set the contents of the cell
+                    // Set the contents of current cell
                     cellContentsTextBox.Text = sheet.GetCellContents(cell).ToString();
 
-                    // Set the value of the cell
+                    // Set the value of current cell
                     cellValueTextBox.Text = sheet.GetCellValue(cell).ToString();
+
+                    // Update the Spreadsheet to show new cell contents
+                    saveCellContents();
 
                 }
             }
-            catch(Exception)
+            catch (Exception f)
             {
-
+                MessageBox.Show("Error: Unable to open Spreadsheet." + f.Message);
             }
+
         }
 
         /// <summary>
@@ -470,7 +473,7 @@ namespace SpreadsheetGUI
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Keeps track of whether user wants to open a chosen Spreadsheet file
-            bool openSpreadsheet = false;
+            bool openSpreadsheet = true;
 
             // Create an instance of the open file dialog box
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -494,69 +497,58 @@ namespace SpreadsheetGUI
             //   (they click 'OK' or 'Cancel'
             DialogResult userActions = openFileDialog.ShowDialog();
 
-            if (sheet.Changed)
+
+            // User chooses a file and clicks "OK" (Actually shows up as "Open" on button)
+            if (userActions == DialogResult.OK)
             {
+                // Name of file user wants to open
+                string openFilename = openFileDialog.FileName.ToString();
 
-                //TODO only show message if spreadsheet changed
-                // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
-                // Set up the look of the message box, message, and buttons
-                string prompt = "There are unsaved changes in your Spreadsheet. Would you like to save " +
-                                "current changes before opening a new Spreadsheet?";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
-                MessageBoxIcon icon = MessageBoxIcon.Warning;
-                DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
-
-                // Perform actions based on the button user chooses
-                switch (userResult)
+                if (sheet.Changed)
                 {
-                    // User selects Yes: Save current Spreadsheet and then open the chosen file
-                    case DialogResult.Yes:
-                        {
-                            openSpreadsheet = true;
-                            saveToolStripMenuItem_Click(sender, e);
-                            // TODO Open selected Spreadsheet file
-                            break;
-                        }
 
-                    // User selects No: Close current Spreadsheet. Open selected Spreadsheet file
-                    case DialogResult.No:
-                        {
-                            openSpreadsheet = true;
-                            closeToolStripMenuItem_Click(sender, e);
-                            // TODO Open selected Spreadsheet file
-                            break;
-                        }
-                    // User selects Cancel: Close out message box. Do not save or open a new Spreadsheet.
-                    case DialogResult.Cancel:
-                        {
-                            break;
-                        }
-                }
+                    //TODO only show message if spreadsheet changed
+                    // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
+                    // Set up the look of the message box, message, and buttons
+                    string prompt = "There are unsaved changes in your Spreadsheet. Would you like to save " +
+                                    "current changes before opening a new Spreadsheet?";
+                    MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
+                    MessageBoxIcon icon = MessageBoxIcon.Warning;
+                    DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
 
-                // User chooses a file and clicks "OK" (Actually shows up as "Open" on button)
-                if (userActions == DialogResult.OK)
-                {
-                    // Name of file user wants to open
-                    this.filename = openFileDialog.FileName;
-
-                    // Open the user's chosen Spreadsheet file
-                    if (openSpreadsheet)
+                    // Perform actions based on the button user chooses
+                    switch (userResult)
                     {
-                        spreadsheetPanel_Load(sender, e);
+                        // User selects Yes: Save current Spreadsheet and then open the chosen file
+                        case DialogResult.Yes:
+                            {
+                                saveToolStripMenuItem_Click(sender, e);
+                                // TODO Open selected Spreadsheet file
+                                break;
+                            }
 
-                        // Open chosen Spreadsheet file
-                        //sheet = new Spreadsheet(openFileDialog.FileName, s => true, s => s, "ps6");
-
-                        // Clear the current Spreadsheet file
-                        //spreadsheetPanel.Clear();
-
-                        // Read through the Spreadsheet file
-
-
+                        // User selects No: Close current Spreadsheet. Open selected Spreadsheet file
+                        case DialogResult.No:
+                            {
+                                // TODO Open selected Spreadsheet file
+                                break;
+                            }
+                        // User selects Cancel: Close out message box. Do not save or open a new Spreadsheet.
+                        case DialogResult.Cancel:
+                            {
+                                openSpreadsheet = false;
+                                break;
+                            }
                     }
                 }
+                // Open the user's chosen Spreadsheet file
+                if (openSpreadsheet)
+                {
+                    // Open chosen Spreadsheet file
+                    sheet = new Spreadsheet(openFilename, s => true, s => s, "ps6");
+                    spreadsheetPanel_Load(sender, e);
+                }
             }
-
         }
 
         /// <summary>
@@ -566,7 +558,11 @@ namespace SpreadsheetGUI
         /// </summary>
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+            SpreadsheetAppContext.getAppContext().Dispose();
+
+            // Close application if this is the last window
+           // if (base.OnClosed(e))
+            Application.Exit();
         }
 
         /// <summary>
