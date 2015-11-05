@@ -13,19 +13,34 @@ using Keyboard = Microsoft.VisualStudio.TestTools.UITesting.Keyboard;
 namespace GUITests
 {
     /// <summary>
-    /// Summary description for CodedUITest1
+    /// Tests the GUI of the spreadsheet.
     /// </summary>
     [CodedUITest]
-    public class CodedUITest1
+    public class TestGUI
     {
-        public CodedUITest1()
+        public TestGUI()
         {
         }
 
+        /// <summary>
+        /// Tests on entering data into the spreadsheet.
+        /// </summary>
         [TestMethod]
-        public void CodedUITestMethod1()
+        public void DataEnteringTests()
         {
             // To generate code for this test, select "Generate Code for Coded UI Test" from the shortcut menu and select one of the menu items.
+            this.UIMap.TestHelloWorld();
+            this.UIMap.AssertHelloWorld();
+            this.UIMap.EraseHelloWorld();
+            this.UIMap.AssertHelloWorldErased();
+            this.UIMap.EnterInvalidFormula();
+            this.UIMap.AssertInvalidFormula();
+            this.UIMap.FixInvalidFormula();
+            this.UIMap.AssertInvalidFormulaFixed();
+            this.UIMap.ErrorInducingFormula();
+            this.UIMap.AssertErrorMessage();
+            this.UIMap.FixErrorInducingFormula();
+            this.UIMap.AssertErrorFixed();
         }
 
         #region Additional test attributes
@@ -64,5 +79,20 @@ namespace GUITests
             }
         }
         private TestContext testContextInstance;
+
+        public UIMap UIMap
+        {
+            get
+            {
+                if ((this.map == null))
+                {
+                    this.map = new UIMap();
+                }
+
+                return this.map;
+            }
+        }
+
+        private UIMap map;
     }
 }
