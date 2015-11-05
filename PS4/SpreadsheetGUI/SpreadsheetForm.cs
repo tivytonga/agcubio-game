@@ -290,7 +290,6 @@ namespace SpreadsheetGUI
 
                     // Set the value of the cell
                     cellValueTextBox.Text = sheet.GetCellValue(cell).ToString();
-
                 }
             }
             catch(Exception)
