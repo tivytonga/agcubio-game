@@ -267,11 +267,11 @@ namespace SpreadsheetGUI
             }
         }
 
-        /// <summary>
+            /// <summary>
         /// Loads a spreadsheet from a file
-        /// </summary>
+            /// </summary>
         private void spreadsheetPanel_Load(object sender, EventArgs e)
-        {
+            {
             try {
                 // Open chosen Spreadsheet file
                 sheet = new Spreadsheet(this.filename, s => true, s => s, "");
@@ -281,7 +281,7 @@ namespace SpreadsheetGUI
 
                 // Read through the Spreadsheet file
                 foreach (string cell in sheet.GetNamesOfAllNonemptyCells())
-                {
+            {
                     // Set the name of the cell
                     cellNameLabel.Text = cell;
 
@@ -290,8 +290,9 @@ namespace SpreadsheetGUI
 
                     // Set the value of the cell
                     cellValueTextBox.Text = sheet.GetCellValue(cell).ToString();
-                }
+
             }
+        }
             catch(Exception)
             {
 
@@ -589,39 +590,39 @@ namespace SpreadsheetGUI
             {
 
                 //TODO only show message if spreadsheet changed
-                // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
-                // Set up the look of the message box, message, and buttons
-                string prompt = "There are unsaved changes in your Spreadsheet. Would you like to save " +
+            // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
+            // Set up the look of the message box, message, and buttons
+            string prompt = "There are unsaved changes in your Spreadsheet. Would you like to save " +
                                 "current changes before opening a new Spreadsheet?";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
-                MessageBoxIcon icon = MessageBoxIcon.Warning;
-                DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
+            MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
+            MessageBoxIcon icon = MessageBoxIcon.Warning;
+            DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
 
-                // Perform actions based on the button user chooses
-                switch (userResult)
-                {
-                    // User selects Yes: Save current Spreadsheet and then open the chosen file
-                    case DialogResult.Yes:
-                        {
+            // Perform actions based on the button user chooses
+            switch (userResult)
+            {
+                // User selects Yes: Save current Spreadsheet and then open the chosen file
+                case DialogResult.Yes:
+                    {
                             openSpreadsheet = true;
                             saveToolStripMenuItem_Click(sender, e);
                             // TODO Open selected Spreadsheet file
-                            break;
-                        }
+                        break;
+                    }
 
                     // User selects No: Close current Spreadsheet. Open selected Spreadsheet file
-                    case DialogResult.No:
-                        {
+                case DialogResult.No:
+                    {
                             openSpreadsheet = true;
                             closeToolStripMenuItem_Click(sender, e);
                             // TODO Open selected Spreadsheet file
-                            break;
-                        }
+                        break;
+                    }
                     // User selects Cancel: Close out message box. Do not save or open a new Spreadsheet.
-                    case DialogResult.Cancel:
-                        {
-                            break;
-                        }
+                case DialogResult.Cancel:
+                    {
+                        break;
+                    }
                 }
 
                 // User chooses a file and clicks "OK" (Actually shows up as "Open" on button)
@@ -648,7 +649,7 @@ namespace SpreadsheetGUI
                 }
             }
 
-        }
+            }
 
         /// <summary>
         /// Called when the Close button is pressed.
@@ -680,11 +681,11 @@ namespace SpreadsheetGUI
             saveFileDialog.Filter = "Spreadsheet Files (.sprd)|*.sprd|All Files(*.*)|*.*";
             saveFileDialog.FilterIndex = 1;
             saveFileDialog.Title = "Save Spreadsheet As...";
-            
+
             // Call ShowDialog method to show the dialog box and keep track of user's actions
             //   (they click 'OK' or 'Cancel'
             DialogResult userActions = saveFileDialog.ShowDialog();
-
+            
             // TODO Save the file
             // if the filename does not end with .sprd
             if (saveFileDialog.FileName != "")
@@ -711,7 +712,7 @@ namespace SpreadsheetGUI
                 filename = saveFilename;
                 checkTitleChanged();
             }
-            
+
         }
 
         /// <summary>
