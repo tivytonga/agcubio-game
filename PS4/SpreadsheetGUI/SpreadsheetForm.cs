@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
+// Eric Longberg & Tivinia Pohahau
+// CS 3500, PS6
+// November 4, 2015
 namespace SpreadsheetGUI
 {
     public partial class SpreadsheetForm : Form
@@ -83,6 +86,8 @@ namespace SpreadsheetGUI
             setTitle("");
             filename = "";
         }
+
+
 
         /// <summary>
         /// Loads the given file, making all necessary changes to the current sheet and display.
@@ -732,7 +737,35 @@ namespace SpreadsheetGUI
         /// </summary>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //TODO about/help menu
+            MessageBox.Show("Spreadsheet Help \n"
+                + "\n"
+                + "Open a new spreadsheet: \n"
+                + "Select 'File'. Then, select 'New' \n"
+                + "Shortcut: CTRL + N \n"
+                + " \n"
+                + "Open a spreadsheet file: \n"
+                + "Select 'File'. Then, select 'Open'. The Open dialog box allows you to choose a file to open. \n"
+                + "Shortcut: CTRL + O \n" 
+                + " \n"
+                + "Save the current spreadsheet: \n"
+                + "Select 'File'. Then, select 'Save'. The Save dialog box allows you to save the current spreadsheet. \n"
+                + "Shortcut: CTRL + S \n"
+                + " \n"
+                + "Close the current spreadsheet: \n"
+                + "Select 'File'. Then, select 'Close'. \n"
+                + "The spreadsheet can also be closed by clicking on the 'x' in the upper right corner of the spreadsheet window.\n"
+                + " \n"
+                + "Change contents of a cell: \n"
+                + "Select a cell. Enter numbers, letters, or a formula. The formula begins with '=' and can reference other cells if necessary.\n"
+                + "The top of the spreadsheet displays the name of the cell, cell contents, and cell value of the selected cell."
+                + "In order for changes to apply to the cell, press Enter or select a different cell. \n"
+                + "\n"
+                + "Special Feature - Graphing:\n"
+                + "There is a basic graphing feature (F3 to toggle). This takes the values of cells in column A as X-variables and pairs them by row \n"
+                + "to the values of cells in column B as Y - variables, connecting the dots to form a \"line.\" The basis for all of this comes from the \n"
+                + "built-in Chart class."
+                + "\n");
         }
+
     }
 }
