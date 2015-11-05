@@ -753,9 +753,15 @@ namespace SpreadsheetGUI
                 + "The spreadsheet can also be closed by clicking on the 'x' in the upper right corner of the spreadsheet window.\n"
                 + " \n"
                 + "Change contents of a cell: \n"
-                + "Select a cell. Enter numbers, letters, or a formula. The formula begins with '=' and can reference other cells.\n"
-                + "The top of the spreadsheet displays the name of cell, cell contents, and cell value of the selected cell."
-                + "In order for changes to apply to the cell, press Enter or select a different cell. \n");
+                + "Select a cell. Enter numbers, letters, or a formula. The formula begins with '=' and can reference other cells if necessary.\n"
+                + "The top of the spreadsheet displays the name of the cell, cell contents, and cell value of the selected cell."
+                + "In order for changes to apply to the cell, press Enter or select a different cell. \n"
+                + "\n"
+                + "Special Feature - Graphing:\n"
+                + "There is a basic graphing feature (F3 to toggle). This takes the values of cells in column A as X-variables and pairs them by row \n"
+                + "to the values of cells in column B as Y - variables, connecting the dots to form a \"line.\" The basis for all of this comes from the \n"
+                + "built-in Chart class."
+                + "\n");
         }
 
     }
