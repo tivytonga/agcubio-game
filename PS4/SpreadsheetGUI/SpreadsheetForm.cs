@@ -754,7 +754,7 @@ namespace SpreadsheetGUI
                 + "Change contents of a cell: \n"
                 + "Select a cell. Enter numbers, letters, or a formula that references other cells.\n"
                 + "The top of the spreadsheet displays the name of cell, cell contents, and cell value of the selected cell."
-                + " \n");
+                + "In order for changes to apply to the cell, press Enter or select a different cell. \n");
         }
 
         private void spreadsheetPanel_Load(object sender, EventArgs e)
