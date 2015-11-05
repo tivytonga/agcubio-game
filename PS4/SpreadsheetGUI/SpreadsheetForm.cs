@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
+// Eric Longberg & Tivinia Pohahau
+// CS 3500, PS6
+// November 4, 2015
 namespace SpreadsheetGUI
 {
     public partial class SpreadsheetForm : Form
