@@ -2,15 +2,10 @@
 using SS;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace SpreadsheetGUI
 {
@@ -25,6 +20,11 @@ namespace SpreadsheetGUI
         /// Represents the location of the currently selected cell (A1->Z99)
         /// </summary>
         Cell currentCell;
+
+        /// <summary>
+        /// Handles the data plotting.
+        /// </summary>
+        Graph graph;
 
         /// <summary>
         /// Regex to match possible cells A1->Z99.
@@ -75,15 +75,111 @@ namespace SpreadsheetGUI
             spreadsheetPanel.SelectionChanged += SpreadsheetPanel_SelectionChanged;
             cellContentsTextBox.PreviewKeyDown += CellContentsTextBox_PreviewKeyDown;
 
+            graph = new Graph(chart);
+            chart.Visible = false;
+
             currentCell = new Cell('A', 1);
             setSelected('A', 1);
             setTitle("");
+            filename = "";
         }
 
-        public SpreadsheetForm(string filename)
+        /// <summary>
+        /// Loads the given file, making all necessary changes to the current sheet and display.
+        /// </summary>
+        private void loadFromFile(string filename)
         {
+            //todo happen in own thread?
+            try {
+                // Open chosen Spreadsheet file
+                sheet = new Spreadsheet(this.filename, s => isValid.IsMatch(s), s => s.ToUpper(), "ps6");
+            } catch (Exception e)
+            {
+                //TODO when file is invalid/etc.
+                throw e;
+            }
+
+            spreadsheetPanel.Clear();
+            //spreadsheetPanel.Invalidate();
+            //spreadsheetPanel.Refresh();
+            //spreadsheetPanel.Update();
+
+            foreach (string name in sheet.GetNamesOfAllNonemptyCells())
+            {
+                spreadsheetPanel.SetValue(Cell.panelCol(name), Cell.panelRow(name), getCellValue(name));
+            }
+
+            graph = new Graph(chart);
+            chart.Visible = false;
+
+            currentCell = new Cell('A', 1);
+            setSelected('A', 1);
+            setTitle(filename);
             this.filename = filename;
         }
+
+        /// <summary>
+        /// Class for handling graphing data.
+        /// </summary>
+        private class Graph{
+            private Chart chart;
+            private DataPointCollection points;
+            private SortedSet<double> xVals;
+            
+            /// <summary>
+            /// Starts our graph using the underlying Chart.
+            /// </summary>
+            public Graph(Chart c)
+            {
+                chart = c;
+                points = c.Series[0].Points;
+                xVals = new SortedSet<double>();
+                Clear();
+            }
+
+            /// <summary>
+            /// Clears the graph of any data points.
+            /// </summary>
+            public void Clear()
+            {
+                points.Clear();
+                xVals.Clear();
+            }
+
+            /// <summary>
+            /// Sets the graph data to be all direct x,y pairs from the given data that are both doubles (as strings) and not already in the graph.
+            /// If one set is bigger than the other, the corresponding elements without matches are not graphed.
+            /// </summary>
+            public void SetData(List<string> xData, List<string> yData)
+            {
+                Clear();
+                Dictionary<double, double> data = new Dictionary<double, double>();
+                
+                for (int i = 0; i < xData.Count; i++)
+                {
+                    double xDub, yDub;
+                    if (Double.TryParse(xData[i], out xDub) && Double.TryParse(yData[i], out yDub))
+                    {
+                        data.Add(xDub, yDub);
+                        xVals.Add(xDub);
+                    }
+                }
+
+                foreach (double x in xVals)
+                {
+                    points.AddXY(x, data[x]);
+                }
+            }
+
+            /// <summary>
+            /// Toggles the visibility of the graph.
+            /// </summary>
+            public void ToggleVisible()
+            {
+                chart.Visible = !chart.Visible;
+            }
+        }
+
 
 
         /// <summary>
@@ -199,41 +295,24 @@ namespace SpreadsheetGUI
             {
                 return (c >= 'A' && c <= 'Z');
             }
-        }
 
-        /// <summary>
-        /// Loads a spreadsheet from a file.
-        /// </summary>
-        private void spreadsheetPanel_Load(object sender, EventArgs e)
-        {
-            IEnumerable<string> openSpreadsheetCells = sheet.GetNamesOfAllNonemptyCells();
-            try
+            /// <summary>
+            /// Gets the 0-indexed row of a valid cell name, suitable for spreadsheetPanel.
+            /// </summary>
+            public static char panelRow(string name)
             {
-                // Clear the current Spreadsheet file
-                spreadsheetPanel.Clear();
-
-                // Read through the Spreadsheet file
-                foreach (string cell in openSpreadsheetCells)
-                {
-                    // Set the name of current cell
-                    cellNameLabel.Text = cell;
-
-                    // Set the contents of current cell
-                    cellContentsTextBox.Text = sheet.GetCellContents(cell).ToString();
-
-                    // Set the value of current cell
-                    cellValueTextBox.Text = sheet.GetCellValue(cell).ToString();
-
-                    // Update the Spreadsheet to show new cell contents
-                    saveCellContents();
-
-                }
-            }
-            catch (Exception f)
-            {
-                MessageBox.Show("Error: Unable to open Spreadsheet." + f.Message);
+                return (char)(name[0] - 'A');
             }
 
+            /// <summary>
+            /// Gets the 0-indexed column of a valid cell name, suitable for spreadsheetPanel.
+            /// </summary>
+            public static int panelCol(string name)
+            {
+                int ret;
+                int.TryParse(name.Split(name[0])[1], out ret);
+                return ret;
+            }
         }
 
         /// <summary>
@@ -271,6 +350,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private bool saveCellContents()
         {
+            //TODO only run on background thread
             HashSet<string> needsUpdate;
             try {
                 needsUpdate = new HashSet<string>(sheet.SetContentsOfCell(currentCell.name, cellContentsTextBox.Text));
@@ -310,10 +390,32 @@ namespace SpreadsheetGUI
             foreach (string name in sheet.GetNamesOfAllNonemptyCells())
             {
                 Cell cell = new Cell(name);
-                spreadsheetPanel.SetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, getCellValue(cell));
+                string val = getCellValue(cell);
+                spreadsheetPanel.SetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, val);
+            }
+            spreadsheetPanel.SetValue(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex, getCellValue(currentCell));
+
+            updateGraph();
+            
+            return true;
+        }
+
+        /// <summary>
+        /// Updates the graph with all data from columns A and B.
+        /// </summary>
+        private void updateGraph()
+        {
+            //TODO only run on background thread
+            List<string> xData = new List<string>();
+            List<string> yData = new List<string>();
+            
+            for (int row = 1; row < 100; row ++)
+            {
+                xData.Add(getCellValue(new Cell('A', row)));
+                yData.Add(getCellValue(new Cell('B', row)));
             }
 
-            return true;
+            graph.SetData(xData, yData);
         }
 
         /// <summary>
@@ -323,6 +425,18 @@ namespace SpreadsheetGUI
         private string getCellValue(Cell cell)
         {
             object val = sheet.GetCellValue(cell.name);
+            if (val is FormulaError)
+                return ((FormulaError)val).Reason;
+            return val.ToString();
+        }
+
+        /// <summary>
+        /// Returns the value of the given cell as a string. If this is
+        /// an invalid formula, then returns the reason as a string.
+        /// </summary>
+        private string getCellValue(string name)
+        {
+            object val = sheet.GetCellValue(name);
             if (val is FormulaError)
                 return ((FormulaError)val).Reason;
             return val.ToString();
@@ -357,6 +471,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private void ChangeSelection(char col, int row)
         {
+            //TODO run setSelected on background thread
             if (!setSelected(col, row))
                 return;
 
@@ -413,12 +528,15 @@ namespace SpreadsheetGUI
 
         /// <summary>
         /// Called upon a KeyDown event in the cellContentsTextBox.
+        /// 
         /// If key code is Enter, move to the next cell downwards.
         /// If key code is Tab, move to the next cell rightwards.
         /// If Shift key is also pressed, then these movements are reversed.
         /// If Shift and an arrow key is pressed, moves in the pressed direction.
         /// If movement would result in an invalid cell, then no movement will occur.
         /// In any of the above cases, attempts to save the contents in the cell.
+        /// 
+        /// If F3 is pressed, the visibility of the graph is toggled.
         /// </summary>
         private void CellContentsTextBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
@@ -445,6 +563,8 @@ namespace SpreadsheetGUI
                         return;
                 }
             }
+            else if (e.KeyCode == Keys.F3)
+                    graph.ToggleVisible();
         }
 
         /// <summary>
@@ -466,131 +586,58 @@ namespace SpreadsheetGUI
         }
 
         /// <summary>
-        /// Called when the Open button is pressed or its shortcut called.
-        /// Opens a spreadsheet from a file replacing the current spreadsheet.
-        /// If this would result in a loss of unsaved data, prompts the user to save.
+        /// Prompts the user if they want to save the current file, and if so then guides them through a save dialog box.
         /// </summary>
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void promptSaveSpreadsheet()
         {
-            // Keeps track of whether user wants to open a chosen Spreadsheet file
-            bool openSpreadsheet = true;
+            // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
+            // Set up the look of the message box, message, and buttons
+            string prompt = "There are unsaved changes in your Spreadsheet. Would you like to save " +
+                            "current changes?";
+            MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
+            MessageBoxIcon icon = MessageBoxIcon.Warning;
+            DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
 
-            // Create an instance of the open file dialog box
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-
-            // Set filter for types of files allowed to open,
-            //    title of the dialog, and multiselection option
-            openFileDialog.Filter = "Spreadsheet Files (.sprd)|*.sprd|All Files(*.*)|*.*";
-            openFileDialog.FilterIndex = 1;
-            openFileDialog.Title = "Open Spreadsheet...";
-            openFileDialog.Multiselect = false;
-
-            // TODO Need to check if current Spreadsheet has been saved before opening a new Spreadsheet
-
-            // If user hits the keys "CTRL + O"
-            KeyEventArgs keyStroke = new KeyEventArgs(Keys.Control);
-            
-            if (keyStroke.Control && keyStroke.KeyCode == Keys.O)
-                openFileDialog.ShowDialog();
-
-            // Call ShowDialog method to show the dialog box and keep track of user's actions
-            //   (they click 'OK' or 'Cancel'
-            DialogResult userActions = openFileDialog.ShowDialog();
-
-
-            // User chooses a file and clicks "OK" (Actually shows up as "Open" on button)
-            if (userActions == DialogResult.OK)
+            // Perform actions based on the button user chooses
+            switch (userResult)
             {
-                // Name of file user wants to open
-                string openFilename = openFileDialog.FileName.ToString();
-
-                if (sheet.Changed)
-                {
-
-                    //TODO only show message if spreadsheet changed
-                    // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
-                    // Set up the look of the message box, message, and buttons
-                    string prompt = "There are unsaved changes in your Spreadsheet. Would you like to save " +
-                                    "current changes before opening a new Spreadsheet?";
-                    MessageBoxButtons buttons = MessageBoxButtons.YesNoCancel;
-                    MessageBoxIcon icon = MessageBoxIcon.Warning;
-                    DialogResult userResult = MessageBox.Show(prompt, "", buttons, icon);
-
-                    // Perform actions based on the button user chooses
-                    switch (userResult)
+                // User selects Yes: Save current Spreadsheet and then open the chosen file
+                case DialogResult.Yes:
                     {
-                        // User selects Yes: Save current Spreadsheet and then open the chosen file
-                        case DialogResult.Yes:
-                            {
-                                saveToolStripMenuItem_Click(sender, e);
-                                // TODO Open selected Spreadsheet file
-                                break;
-                            }
-
-                        // User selects No: Close current Spreadsheet. Open selected Spreadsheet file
-                        case DialogResult.No:
-                            {
-                                // TODO Open selected Spreadsheet file
-                                break;
-                            }
-                        // User selects Cancel: Close out message box. Do not save or open a new Spreadsheet.
-                        case DialogResult.Cancel:
-                            {
-                                openSpreadsheet = false;
-                                break;
-                            }
+                        saveSpreadsheetDialog();
+                        break;
                     }
-                }
-                // Open the user's chosen Spreadsheet file
-                if (openSpreadsheet)
-                {
-                    // Open chosen Spreadsheet file
-                    sheet = new Spreadsheet(openFilename, s => true, s => s, "ps6");
-                    spreadsheetPanel_Load(sender, e);
-                }
+
+                // User selects No: Close out message box. Do not save.
+                case DialogResult.No:
+                    {
+                        break;
+                    }
+                // User selects Cancel: Close out message box. Do not save.
+                case DialogResult.Cancel:
+                    {
+                        break;
+                    }
             }
         }
 
         /// <summary>
-        /// Called when the Close button is pressed.
-        /// Closes this spreadsheet window. If this is the last window, the application
-        /// should be terminated.
+        /// Guides the user through a save dialog to save the spreadsheet.
         /// </summary>
-        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void saveSpreadsheetDialog()
         {
-            SpreadsheetAppContext.getAppContext().Dispose();
-
-            // Close application if this is the last window
-           // if (base.OnClosed(e))
-            Application.Exit();
-        }
-
-        /// <summary>
-        /// Called when the Save button is pressed or its shortcut called.
-        /// Saves the current spreadsheet to a file.
-        /// </summary>
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
             // Create an instance of the save file dialog box
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-
-            // If user hits the keys "CTRL + S"
-            KeyEventArgs keyStroke = new KeyEventArgs(Keys.Control);
-
-            if (keyStroke.Control && keyStroke.KeyCode == Keys.S)
-                saveFileDialog.ShowDialog();
 
             // Set filter for saving a Spreadsheet
             saveFileDialog.Filter = "Spreadsheet Files (.sprd)|*.sprd|All Files(*.*)|*.*";
             saveFileDialog.FilterIndex = 1;
             saveFileDialog.Title = "Save Spreadsheet As...";
-            
+
             // Call ShowDialog method to show the dialog box and keep track of user's actions
             //   (they click 'OK' or 'Cancel'
             DialogResult userActions = saveFileDialog.ShowDialog();
-
-            // TODO Save the file
+            
             // if the filename does not end with .sprd
             if (saveFileDialog.FileName != "")
             {
@@ -616,7 +663,62 @@ namespace SpreadsheetGUI
                 filename = saveFilename;
                 checkTitleChanged();
             }
-            
+        }
+
+        /// <summary>
+        /// Called when the Open button is pressed or its shortcut called.
+        /// Opens a spreadsheet from a file replacing the current spreadsheet.
+        /// If this would result in a loss of unsaved data, prompts the user to save.
+        /// </summary>
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Create an instance of the open file dialog box
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            // Set filter for types of files allowed to open,
+            //    title of the dialog, and multiselection option
+            openFileDialog.Filter = "Spreadsheet Files (.sprd)|*.sprd|All Files(*.*)|*.*";
+            openFileDialog.FilterIndex = 1;
+            openFileDialog.Title = "Open Spreadsheet...";
+            openFileDialog.Multiselect = false;
+
+            // Call ShowDialog method to show the dialog box and keep track of user's actions
+            //   (they click 'OK' or 'Cancel'
+            DialogResult userActions = openFileDialog.ShowDialog();
+
+            // User chooses a file and clicks "OK" (Actually shows up as "Open" on button)
+            if (userActions == DialogResult.OK)
+            {
+                // Check if user wants to save their file, if needed
+                if (Changed)
+                    promptSaveSpreadsheet();
+
+                // Name of file user wants to open
+                this.filename = openFileDialog.FileName;
+                // Open the user's chosen Spreadsheet file
+                loadFromFile(this.filename);
+            }
+        }
+
+        /// <summary>
+        /// Called when the Close button is pressed.
+        /// Closes this spreadsheet window, prompting for a save if necessary. If this is the last window, the application
+        /// should be terminated.
+        /// </summary>
+        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Changed)
+                promptSaveSpreadsheet();
+            //TODO finish actually closing
+        }
+
+        /// <summary>
+        /// Called when the Save button is pressed or its shortcut called.
+        /// Saves the current spreadsheet to a file.
+        /// </summary>
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            saveSpreadsheetDialog();   
         }
 
         /// <summary>
@@ -624,7 +726,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            //TODO about/help menu
         }
     }
 }
