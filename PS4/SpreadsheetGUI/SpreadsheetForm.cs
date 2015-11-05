@@ -84,6 +84,8 @@ namespace SpreadsheetGUI
             filename = "";
         }
 
+
+
         /// <summary>
         /// Loads the given file, making all necessary changes to the current sheet and display.
         /// </summary>
@@ -726,7 +728,32 @@ namespace SpreadsheetGUI
         /// </summary>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //TODO about/help menu
+            MessageBox.Show("Spreadsheet Help \n"
+                + "\n"
+                + "Open a new spreadsheet: \n"
+                + "Select 'File'. Then, select 'New' \n"
+                + "The shortcut to open a new spreadsheet is 'CTRL + N' \n"
+                + " \n"
+                + "Open a spreadsheet file: \n"
+                + "Select 'File'. Then, select 'Open'. The Open dialog box allows you to choose a file to open. \n"
+                + "The shortcut to open a spreadsheet file is 'CTRL + O' \n"
+                + " \n"
+                + "Save the current spreadsheet: \n"
+                + "Select 'File'. Then, select 'Save'. The Save dialog box allows you to save the current spreadsheet. \n"
+                + "The shortcut to save the current spreadsheet is 'CTRL + S' \n"
+                + " \n"
+                + "Close the current spreadsheet: \n"
+                + "Select 'File'. Then, select 'Close'. \n"
+                + " \n"
+                + "Change contents of a cell: \n"
+                + "Select a cell. Enter numbers, letters, or a formula that references other cells.\n"
+                + "The top of the spreadsheet displays the name of cell, cell contents, and cell value of the selected cell."
+                + " \n");
+        }
+
+        private void spreadsheetPanel_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
