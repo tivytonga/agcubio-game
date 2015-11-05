@@ -54,6 +54,7 @@
             this.cellNameLabel = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.backgroundUpdateGraph = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart)).BeginInit();
@@ -148,7 +149,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(181, 30);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(153, 30);
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -254,6 +255,10 @@
             this.chart.TabStop = false;
             this.chart.Text = "chart1";
             // 
+            // backgroundUpdateGraph
+            // 
+            this.backgroundUpdateGraph.DoWork += new System.ComponentModel.DoWorkEventHandler(this.background_DoWorkUpdateGraph);
+            // 
             // SpreadsheetForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -295,6 +300,7 @@
         private System.Windows.Forms.Label cellNameLabel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart;
+        private System.ComponentModel.BackgroundWorker backgroundUpdateGraph;
     }
 }
 

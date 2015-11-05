@@ -77,6 +77,7 @@ namespace SpreadsheetGUI
 
             spreadsheetPanel.SelectionChanged += SpreadsheetPanel_SelectionChanged;
             cellContentsTextBox.PreviewKeyDown += CellContentsTextBox_PreviewKeyDown;
+            FormClosing += saveClose;
 
             graph = new Graph(chart);
             chart.Visible = false;
@@ -91,17 +92,16 @@ namespace SpreadsheetGUI
 
         /// <summary>
         /// Loads the given file, making all necessary changes to the current sheet and display.
+        /// Returns false if file or filename is invalid.
         /// </summary>
-        private void loadFromFile(string filename)
+        private bool loadFromFile(string filename)
         {
-            //todo happen in own thread?
             try {
                 // Open chosen Spreadsheet file
                 sheet = new Spreadsheet(this.filename, s => isValid.IsMatch(s), s => s.ToUpper(), "ps6");
             } catch (Exception e)
             {
-                //TODO when file is invalid/etc.
-                throw e;
+                return false;
             }
 
             spreadsheetPanel.Clear();
@@ -113,7 +113,7 @@ namespace SpreadsheetGUI
 
             graph = new Graph(chart);
             chart.Visible = false;
-            updateGraph();
+            backgroundUpdateGraph.RunWorkerAsync();
 
             currentCell = new Cell("A1");
             spreadsheetPanel.SetSelection(Cell.panelCol("A1"), Cell.panelRow("A1"));
@@ -121,6 +121,7 @@ namespace SpreadsheetGUI
 
             setTitle(filename);
             this.filename = filename;
+            return true;
         }
 
         /// <summary>
@@ -139,14 +140,6 @@ namespace SpreadsheetGUI
                 chart = c;
                 points = c.Series[0].Points;
                 xVals = new SortedSet<double>();
-                Clear();
-            }
-
-            /// <summary>
-            /// Clears the graph of any data points.
-            /// </summary>
-            public void Clear()
-            {
                 points.Clear();
                 xVals.Clear();
             }
@@ -157,7 +150,9 @@ namespace SpreadsheetGUI
             /// </summary>
             public void SetData(List<string> xData, List<string> yData)
             {
-                Clear();
+                points.SuspendUpdates();
+                points.Clear();
+                xVals.Clear();
                 Dictionary<double, double> data = new Dictionary<double, double>();
                 
                 for (int i = 0; i < xData.Count; i++)
@@ -174,6 +169,11 @@ namespace SpreadsheetGUI
                 {
                     points.AddXY(x, data[x]);
                 }
+            }
+
+            public void resume()
+            {
+                points.ResumeUpdates();
             }
 
             /// <summary>
@@ -355,7 +355,6 @@ namespace SpreadsheetGUI
         /// </summary>
         private bool saveCellContents()
         {
-            //TODO only run on background thread
             HashSet<string> needsUpdate;
             try {
                 needsUpdate = new HashSet<string>(sheet.SetContentsOfCell(currentCell.name, cellContentsTextBox.Text));
@@ -370,55 +369,16 @@ namespace SpreadsheetGUI
                 MessageBox.Show(e.Message, "Invalid Formula.");
                 return false;
             }
-            /*
-            Debug.WriteLine("Dependents:");
-            foreach (string name in needsUpdate)
-            {
-                Cell cell = new Cell(name);
-                spreadsheetPanel.SetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, getCellValue(cell));
 
-                Debug.WriteLine(cell.name);
-                string o;
-                spreadsheetPanel.GetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, out o);
-                Debug.WriteLine("Cell: "+cell.name);
-                Debug.WriteLine("Displayed value: "+o);
-                Debug.WriteLine("Internal value: "+getCellValue(cell));
-                Debug.WriteLine("");
-                
-            }
-            Debug.WriteLine("");
-            */
-            // Temporary(?) fix for an error, can achieve as follows after replacing this foreach loop with the above commented:
-            /*Click B1, contents "=A1", click B1 to update,
-			change A1 at any point, B1 does not update (and loses
-			Dependence on A1 somehow, until clicking on B1 again) */
+            backgroundUpdateGraph.RunWorkerAsync();
+
             foreach (string name in sheet.GetNamesOfAllNonemptyCells())
             {
                 spreadsheetPanel.SetValue(Cell.panelCol(name), Cell.panelRow(name), getCellValue(name));
             }
             spreadsheetPanel.SetValue(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex, getCellValue(currentCell));
-
-            updateGraph();
             
             return true;
-        }
-
-        /// <summary>
-        /// Updates the graph with all data from columns A and B.
-        /// </summary>
-        private void updateGraph()
-        {
-            //TODO only run on background thread
-            List<string> xData = new List<string>();
-            List<string> yData = new List<string>();
-            
-            for (int row = 1; row < 100; row ++)
-            {
-                xData.Add(getCellValue(new Cell('A', row)));
-                yData.Add(getCellValue(new Cell('B', row)));
-            }
-
-            graph.SetData(xData, yData);
         }
 
         /// <summary>
@@ -474,7 +434,6 @@ namespace SpreadsheetGUI
         /// </summary>
         private void ChangeSelection(char col, int row)
         {
-            //TODO run setSelected on background thread
             if (!setSelected(col, row))
                 return;
 
@@ -598,8 +557,9 @@ namespace SpreadsheetGUI
 
         /// <summary>
         /// Prompts the user if they want to save the current file, and if so then guides them through a save dialog box.
+        /// Returns false if the user cancels.
         /// </summary>
-        private void promptSaveSpreadsheet()
+        private bool promptSaveSpreadsheet()
         {
             // Pop up a message to ask user if they want to save current Spreadsheet before opening a new one
             // Set up the look of the message box, message, and buttons
@@ -616,20 +576,21 @@ namespace SpreadsheetGUI
                 case DialogResult.Yes:
                     {
                         saveSpreadsheetDialog();
-                        break;
+                        return true;
                     }
 
                 // User selects No: Close out message box. Do not save.
                 case DialogResult.No:
                     {
-                        break;
+                        return true;
                     }
                 // User selects Cancel: Close out message box. Do not save.
                 case DialogResult.Cancel:
                     {
-                        break;
+                        return false;
                     }
             }
+            return false;
         }
 
         /// <summary>
@@ -707,20 +668,39 @@ namespace SpreadsheetGUI
                 // Name of file user wants to open
                 this.filename = openFileDialog.FileName;
                 // Open the user's chosen Spreadsheet file
-                loadFromFile(this.filename);
+                if (!loadFromFile(this.filename))
+                {
+                    MessageBox.Show("Invalid file.");
+                }
             }
         }
 
         /// <summary>
         /// Called when the Close button is pressed.
-        /// Closes this spreadsheet window, prompting for a save if necessary. If this is the last window, the application
+        /// Closes this spreadsheet window (unless canceled), prompting for a save if necessary. If this is the last window, the application
         /// should be terminated.
         /// </summary>
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Close(); // Will enact saveClose
+        }
+
+        /// <summary>
+        /// Called automatically when intending to close. Prompts to save, then closes if appropriate.
+        /// </summary>
+        private void saveClose(object sender, EventArgs e)
+        {
+            bool cancel = false;
             if (Changed)
-                promptSaveSpreadsheet();
-            //TODO finish actually closing
+                cancel = !promptSaveSpreadsheet();
+            if (e is FormClosingEventArgs)
+            {
+                if (cancel)
+                    ((FormClosingEventArgs)e).Cancel = true;
+                return;
+            }
+            if (!cancel)
+                Close();
         }
 
         /// <summary>
@@ -737,9 +717,7 @@ namespace SpreadsheetGUI
         /// </summary>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Spreadsheet Help \n"
-                + "\n"
-                + "Open a new spreadsheet: \n"
+            MessageBox.Show("Open a new spreadsheet: \n"
                 + "Select 'File'. Then, select 'New' \n"
                 + "Shortcut: CTRL + N \n"
                 + " \n"
@@ -758,14 +736,47 @@ namespace SpreadsheetGUI
                 + "Change contents of a cell: \n"
                 + "Select a cell. Enter numbers, letters, or a formula. The formula begins with '=' and can reference other cells if necessary.\n"
                 + "The top of the spreadsheet displays the name of the cell, cell contents, and cell value of the selected cell."
-                + "In order for changes to apply to the cell, press Enter or select a different cell. \n"
+                + "In order for changes to apply to the cell, perform a movement or select a different cell. \n"
+                + "\n"
+                + "Movement can happen in any of the following ways: \n"
+                + "Clicking another cell. \n"
+                + "Shift + Down or Enter        -- Move down. \n"
+                + "Shift + Up or Shift + Enter  -- Move up. \n"
+                + "Shift + Right or Tab         -- Move right. \n"
+                + "Shift + Left or Shift + Tab  -- Move left. \n"
                 + "\n"
                 + "Special Feature - Graphing:\n"
                 + "There is a basic graphing feature (F3 to toggle). This takes the values of cells in column A as X-variables and pairs them by row \n"
                 + "to the values of cells in column B as Y - variables, connecting the dots to form a \"line.\" The basis for all of this comes from the \n"
                 + "built-in Chart class."
-                + "\n");
+                + "\n", "Spreadsheet Help");
         }
 
+        /// <summary>
+        /// Updates the graph with all data from columns A and B, using the background thread.
+        /// </summary>
+        private void background_DoWorkUpdateGraph(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            List<string> xData = new List<string>();
+            List<string> yData = new List<string>();
+
+            for (int row = 1; row < 100; row++)
+            {
+                xData.Add(getCellValue(new Cell('A', row)));
+                yData.Add(getCellValue(new Cell('B', row)));
+            }
+
+            bool visible = chart.Visible;
+
+            MethodInvoker makeInvisible = new MethodInvoker(() => { if (chart.Visible) chart.Visible = false;});
+            Invoke(makeInvisible);
+
+            graph.SetData(xData, yData);
+            MethodInvoker resume = new MethodInvoker(() => { graph.resume(); });
+            Invoke(resume);
+
+            MethodInvoker makeVisible = new MethodInvoker(() => { if (visible) chart.Visible = true; });
+            Invoke(makeVisible);
+        }
     }
 }

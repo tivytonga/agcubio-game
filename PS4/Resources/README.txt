@@ -17,6 +17,7 @@ An asterisk * by the title will denote when a spreadsheet has unsaved changes.
 
 Additionally, we have a basic graphing feature (F3 to toggle). This takes the values of cells in column A as X-variables and pairs them by row
 to the values of cells in column B as Y-variables, connecting the dots to form a "line." The basis for all of this comes from the built-in Chart class.
+Work for updating the grapher is done on a background thread.
 
 Focus is to remain on the Contents Textbox except in the following circumstances:
 --The menu bar is selected.
