@@ -78,7 +78,7 @@ namespace SpreadsheetGUI
             graph = new Graph(chart);
             chart.Visible = false;
 
-            currentCell = new Cell('A', 1);
+            currentCell = new Cell("A1");
             spreadsheetPanel.SetSelection(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex);
             setTitle("");
             filename = "";
@@ -102,9 +102,6 @@ namespace SpreadsheetGUI
             }
 
             spreadsheetPanel.Clear();
-            //spreadsheetPanel.Invalidate();
-            //spreadsheetPanel.Refresh();
-            //spreadsheetPanel.Update();
 
             foreach (string name in sheet.GetNamesOfAllNonemptyCells())
             {
@@ -113,9 +110,12 @@ namespace SpreadsheetGUI
 
             graph = new Graph(chart);
             chart.Visible = false;
+            updateGraph();
 
-            currentCell = new Cell('A', 1);
-            spreadsheetPanel.SetSelection(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex);
+            currentCell = new Cell("A1");
+            spreadsheetPanel.SetSelection(Cell.panelCol("A1"), Cell.panelRow("A1"));
+            UpdateHUD();
+
             setTitle(filename);
             this.filename = filename;
         }
@@ -299,17 +299,17 @@ namespace SpreadsheetGUI
             }
 
             /// <summary>
-            /// Gets the 0-indexed row of a valid cell name, suitable for spreadsheetPanel.
-            /// </summary>
-            public static char panelRow(string name)
-            {
-                return (char)(name[0] - 'A');
-            }
-
-            /// <summary>
             /// Gets the 0-indexed column of a valid cell name, suitable for spreadsheetPanel.
             /// </summary>
             public static int panelCol(string name)
+            {
+                return name[0] - 'A';
+            }
+
+            /// <summary>
+            /// Gets the 0-indexed row of a valid cell name, suitable for spreadsheetPanel.
+            /// </summary>
+            public static int panelRow(string name)
             {
                 int ret;
                 int.TryParse(name.Split(name[0])[1], out ret);
@@ -391,9 +391,7 @@ namespace SpreadsheetGUI
 			Dependence on A1 somehow, until clicking on B1 again) */
             foreach (string name in sheet.GetNamesOfAllNonemptyCells())
             {
-                Cell cell = new Cell(name);
-                string val = getCellValue(cell);
-                spreadsheetPanel.SetValue(cell.colAsPanelIndex, cell.rowAsPanelIndex, val);
+                spreadsheetPanel.SetValue(Cell.panelCol(name), Cell.panelRow(name), getCellValue(name));
             }
             spreadsheetPanel.SetValue(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex, getCellValue(currentCell));
 
@@ -477,6 +475,14 @@ namespace SpreadsheetGUI
             if (!setSelected(col, row))
                 return;
 
+            UpdateHUD();
+        }
+
+        /// <summary>
+        /// Updates the current cell label/contents/value at the top of the gui.
+        /// </summary>
+        private void UpdateHUD()
+        {
             checkTitleChanged();
             cellNameLabel.Text = currentCell.name;
             cellContentsTextBox.Text = getCellContents(currentCell);

@@ -69,7 +69,6 @@
             this.spreadsheetPanel.Size = new System.Drawing.Size(1467, 717);
             this.spreadsheetPanel.TabIndex = 1;
             this.spreadsheetPanel.TabStop = false;
-            this.spreadsheetPanel.Load += new System.EventHandler(this.spreadsheetPanel_Load);
             // 
             // menuStrip1
             // 
