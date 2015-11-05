@@ -738,28 +738,25 @@ namespace SpreadsheetGUI
                 + "\n"
                 + "Open a new spreadsheet: \n"
                 + "Select 'File'. Then, select 'New' \n"
-                + "The shortcut to open a new spreadsheet is 'CTRL + N' \n"
+                + "Shortcut: CTRL + N \n"
                 + " \n"
                 + "Open a spreadsheet file: \n"
                 + "Select 'File'. Then, select 'Open'. The Open dialog box allows you to choose a file to open. \n"
-                + "The shortcut to open a spreadsheet file is 'CTRL + O' \n"
+                + "Shortcut: CTRL + O \n" 
                 + " \n"
                 + "Save the current spreadsheet: \n"
                 + "Select 'File'. Then, select 'Save'. The Save dialog box allows you to save the current spreadsheet. \n"
-                + "The shortcut to save the current spreadsheet is 'CTRL + S' \n"
+                + "Shortcut: CTRL + S \n"
                 + " \n"
                 + "Close the current spreadsheet: \n"
                 + "Select 'File'. Then, select 'Close'. \n"
+                + "The spreadsheet can also be closed by clicking on the 'x' in the upper right corner of the spreadsheet window.\n"
                 + " \n"
                 + "Change contents of a cell: \n"
-                + "Select a cell. Enter numbers, letters, or a formula that references other cells.\n"
+                + "Select a cell. Enter numbers, letters, or a formula. The formula begins with '=' and can reference other cells.\n"
                 + "The top of the spreadsheet displays the name of cell, cell contents, and cell value of the selected cell."
                 + "In order for changes to apply to the cell, press Enter or select a different cell. \n");
         }
 
-        private void spreadsheetPanel_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }
