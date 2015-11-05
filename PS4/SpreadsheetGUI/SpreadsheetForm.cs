@@ -79,7 +79,7 @@ namespace SpreadsheetGUI
             chart.Visible = false;
 
             currentCell = new Cell('A', 1);
-            setSelected('A', 1);
+            spreadsheetPanel.SetSelection(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex);
             setTitle("");
             filename = "";
         }
@@ -113,7 +113,7 @@ namespace SpreadsheetGUI
             chart.Visible = false;
 
             currentCell = new Cell('A', 1);
-            setSelected('A', 1);
+            spreadsheetPanel.SetSelection(currentCell.colAsPanelIndex, currentCell.rowAsPanelIndex);
             setTitle(filename);
             this.filename = filename;
         }
@@ -311,7 +311,7 @@ namespace SpreadsheetGUI
             {
                 int ret;
                 int.TryParse(name.Split(name[0])[1], out ret);
-                return ret;
+                return ret - 1;
             }
         }
 

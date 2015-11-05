@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\..\..\..\Desktop\demo.sprd = ..\..\..\..\Desktop\demo.sprd
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUITests", "GUITests\GUITests.csproj", "{65963CE6-6809-4894-9E28-11FAC851D27C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{C686835C-AE35-46FD-B545-74000669119A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8239315D-6762-4780-9115-D98A5740C948}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{8239315D-6762-4780-9115-D98A5740C948}.Release|Any CPU.ActiveCfg = Release|x86
+		{65963CE6-6809-4894-9E28-11FAC851D27C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65963CE6-6809-4894-9E28-11FAC851D27C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65963CE6-6809-4894-9E28-11FAC851D27C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65963CE6-6809-4894-9E28-11FAC851D27C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
