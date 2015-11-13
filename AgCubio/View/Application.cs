@@ -18,7 +18,5 @@ namespace View
             System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
             System.Windows.Forms.Application.Run(new GUIForm());
         }
-
-
     }
 }
