@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Model
+namespace AgCubio
 {
     /// <summary>
     /// The state of the simulation. Tracks the world width, height, all cubes, etc.
@@ -14,16 +14,16 @@ namespace Model
         /// <summary>
         /// Width of the world, in pixels.
         /// </summary>
-        public static readonly int Width = 1000;
+        public readonly int Width = 1000;
         /// <summary>
         /// Height of the world, in pixels.
         /// </summary>
-        public static readonly int Height = 1000;
+        public readonly int Height = 1000;
 
         /// <summary>
         /// All of the cubes in the world.
         /// </summary>
-        private List<Cube> cubes;
+        private Dictionary<long, Cube> cubes;
 
         public World()
         {

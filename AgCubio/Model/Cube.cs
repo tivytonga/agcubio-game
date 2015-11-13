@@ -2,7 +2,7 @@
 using System;
 using System.Drawing;
 
-namespace Model
+namespace AgCubio
 {
     /// <summary>
     /// Stores all information associated with a given cube.
