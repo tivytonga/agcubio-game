@@ -7,7 +7,11 @@ using System.Threading.Tasks;
 namespace Model
 {
     /// <summary>
-    /// A Cube object...
+    /// Represents a cube in the game logic. The cube's name is set to the player's input during
+    /// the creation of the cube. Also, at the creation of the cube the unique ID, and color are set 
+    /// to random values that cannot be changed by the player. The mass of the cube increases as the
+    /// cube consumes food or other cubes. The cube's current location, visibility, and status are
+    /// tracked in the game. If the cube is no longer active, then it is considered dead.
     /// </summary>
     public class Cube
     {
@@ -27,7 +31,9 @@ namespace Model
         /// Creates a new cube.
         /// </summary>
         Cube()
-        { }
+        {
+            // TODO: Set defaults of the cube
+        }
 
         /// <summary>
         /// The name of this cube given by the player.
