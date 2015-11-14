@@ -20,7 +20,7 @@ namespace Model
         private double xCoord;
         private double yCoord;
         private string color;
-        public string name { get; private set; }
+        public string name;
         private double mass;
         private bool visible;
         private bool dead;
