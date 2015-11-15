@@ -15,6 +15,10 @@ namespace View
         public GUIForm()
         {
             InitializeComponent();
+
+           
         }
+
+
     }
 }
