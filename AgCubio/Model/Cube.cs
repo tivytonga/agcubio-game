@@ -74,7 +74,7 @@ namespace Model
         /// <summary>
         /// Creates a new cube.
         /// </summary>
-        Cube()
+        public Cube()
         {
             // TODO: Set defaults of the cube
             Mass = 50;
@@ -83,10 +83,10 @@ namespace Model
         /// <summary>
         /// The current width of this cube.
         /// </summary>
-        public double Width
+        public int Width
         {
-            get { return Math.Sqrt(Mass); }
-            private set { Mass = (int) value * 2; }
+            get { return (int) Math.Sqrt(Mass); }
+            private set { Mass = value * 2; }
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Model
         /// </summary>
         public override string ToString()
         {
-            return Name + " " + uniqueID;
+            return Name + " " + Unique_ID;
         }
 
     }

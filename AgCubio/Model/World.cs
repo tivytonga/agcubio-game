@@ -11,7 +11,7 @@ namespace Model
     /// Represents the "state" of the simulation. World is responsible for tracking
     /// the width and height of the world and all the cubes in the game. 
     /// </summary>
-    class World
+    public class World
     {
         /// Variables for the properties of the World
         public int Width { get; private set; }
@@ -83,7 +83,7 @@ namespace Model
         {
             // TODO: Set the defaults for World constructor
             Width = 1000;
-            Height = 1000;
+            Height = 700;
         }
 
         public World(int width, int height)

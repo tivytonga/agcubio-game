@@ -38,6 +38,16 @@
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
             this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.BackColor = System.Drawing.Color.White;
+            this.splitContainer1.Panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel1_Paint);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.BackColor = System.Drawing.Color.LightGray;
+            this.splitContainer1.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel2_Paint);
             this.splitContainer1.Size = new System.Drawing.Size(795, 500);
             this.splitContainer1.SplitterDistance = 645;
             this.splitContainer1.TabIndex = 0;
@@ -49,7 +59,8 @@
             this.ClientSize = new System.Drawing.Size(795, 500);
             this.Controls.Add(this.splitContainer1);
             this.Name = "GUIForm";
-            this.Text = "Form1";
+            this.Text = "AgCubio";
+            this.Load += new System.EventHandler(this.GUIForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);

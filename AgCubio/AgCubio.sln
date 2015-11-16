@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{5AC18EFE-545A-4278-A9FE-2F69E2B269BC}"
 EndProject
@@ -31,7 +31,6 @@ Global
 		{38293786-2A75-48C2-9557-7786795F73E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38293786-2A75-48C2-9557-7786795F73E9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{210AA165-543F-43EA-B670-AC70D9C07DFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{210AA165-543F-43EA-B670-AC70D9C07DFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{210AA165-543F-43EA-B670-AC70D9C07DFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{210AA165-543F-43EA-B670-AC70D9C07DFD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{98C341EB-7FD4-484F-A634-C918ED9056D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
