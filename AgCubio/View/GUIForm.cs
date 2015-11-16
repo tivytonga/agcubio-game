@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AgCubio;
 
 namespace View
 {
@@ -16,8 +17,8 @@ namespace View
         /// World is used to set all the properties of the Form.
         /// Cube is used to set all the properties of the player's cube.
         /// </summary>
-        Model.World world;
-        Model.Cube cube;
+        World world;
+        Cube cube;
         Point local; // TODO: (Might not need this) Used to keep track of the mouse's location
 
 
@@ -29,10 +30,10 @@ namespace View
         public GUIForm()
         {
             InitializeComponent();
-            world = new Model.World();
-            cube = new Model.Cube();
-            this.DoubleBuffered = true;
-            this.Size = new Size(world.Width, world.Height);
+            world = new World();
+            cube = new Cube();
+            DoubleBuffered = true;
+            Size = new Size(world.Width, world.Height);
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace View
             // TODO: Code the beginning screen where player enters their name and server
             // Settings for the Rectangle and Brush
             Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
-            SolidBrush brush = new SolidBrush(Color.FromName(cube.Color));
+            SolidBrush brush = new SolidBrush(cube.color);
 
             // Draw cube
             e.Graphics.FillRectangle(brush, cube.xCoord, cube.yCoord, cube.Width, cube.Width);
@@ -71,7 +72,7 @@ namespace View
         {
             // Settings for the Rectangle and Brush
             Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
-            SolidBrush brush = new SolidBrush(Color.FromName(cube.Color));
+            SolidBrush brush = new SolidBrush(cube.color);
 
             // Draw cube
             e.Graphics.FillRectangle(brush, cube.xCoord, cube.yCoord, cube.Width, cube.Width);

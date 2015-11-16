@@ -20,6 +20,11 @@ namespace AgCubio
         public long id { get; }
 
         /// <summary>
+        /// The team_id will have the same value as the original cube's uid if the cube belongs to that player.
+        /// </summary>
+        public long team_id { get; }
+
+        /// <summary>
         /// The color of the cube.
         /// </summary>
         [JsonProperty("argb_color")]
@@ -29,19 +34,19 @@ namespace AgCubio
         /// The current x position of the top left corner of the cube.
         /// </summary>
         [JsonProperty("loc_x")]
-        public double xCoord { get; set; }
+        public int xCoord { get; set; }
 
         /// <summary>
         /// The current y position of the top left corner of the cube.
         /// </summary>
         [JsonProperty("loc_y")]
-        public double yCoord { get; set; }
+        public int yCoord { get; set; }
 
         /// <summary>
         /// The name of the cube (empty string if not a player i.e. food).
         /// </summary>
         [JsonProperty]
-        public string Name { get; }
+        public string Name { get; set; }
             
         /// <summary>
         /// The current mass of the cube.
@@ -63,12 +68,13 @@ namespace AgCubio
         /// Creates a cube with all of the given properties.
         /// </summary>
         [JsonConstructor]
-        public Cube(long uid, int argb_color, double x, double y, string name, double mass, bool food) 
+        public Cube(long uid, long team_id, int argb_color, double x, double y, string name, double mass, bool food) 
         {
             id = uid;
+            this.team_id = team_id;
             color = Color.FromArgb(argb_color);
-            xCoord = x;
-            yCoord = y;
+            xCoord = (int)x;
+            yCoord = (int)y;
             Name = name;
             Mass = mass;
             this.food = food;
@@ -125,6 +131,8 @@ namespace AgCubio
         [JsonIgnore]
         public float Last_Update;
 
+
+        /** are the below needed?
         /// <summary>
         /// The last known distance from the top of the field of view.
         /// </summary>
@@ -160,5 +168,6 @@ namespace AgCubio
         {
             get { return 0; } // TODO: Calculate "Bottom" Property
         }
+    **/
     }
 }
