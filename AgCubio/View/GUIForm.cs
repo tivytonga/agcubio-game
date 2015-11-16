@@ -69,8 +69,8 @@ namespace View
         private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
         {
             // Statistics from World displaying most current data
-            string statistics = "FPS: " + world.Heartbeats_Per_Second + "\n\n"
-                              + "Food: " + world.Max_Food + "\n\n"
+            string statistics = "FPS: " + "?" + "\n\n" // TODO: Calculate FPS
+                              + "Food: " + "?" + "\n\n" // TODO: Calculate # of food on the screen
                               + "Mass: " + cube.Mass + "\n\n"
                               + "Width: " + world.Width;
 
@@ -78,7 +78,7 @@ namespace View
             {
                 Rectangle rect1 = new Rectangle(10, 10, 130, 140);
 
-                // Create a StringFormat object and specify format
+                // Create a StringFormat object and specify format (left-allign)
                 StringFormat stringFormat = new StringFormat();
                 stringFormat.Alignment = StringAlignment.Near;
                 stringFormat.LineAlignment = StringAlignment.Near;
