@@ -111,7 +111,7 @@ namespace AgCubio
             }
         }
 
-        // Useless? have user call state.BeginReceive() themself
+        // Useless? have user call state.BeginReceive() theirself
         /// <summary>
         /// Begins the receiving of data.
         /// </summary>

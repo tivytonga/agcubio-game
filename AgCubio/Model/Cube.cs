@@ -69,5 +69,12 @@ namespace AgCubio
             Mass = mass;
             this.food = food;
         }
+
+        public override string ToString()
+        {
+            string ret = "";
+            ret += xPos + " " + yPos + " " + Name + " " + food;
+            return ret;
+        }
     }
 }
