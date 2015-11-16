@@ -5,7 +5,11 @@ using System.Drawing;
 namespace AgCubio
 {
     /// <summary>
-    /// Stores all information associated with a given cube.
+    /// Represents a cube in the game logic. The cube's name is set to the player's input during
+    /// the creation of the cube. Also, at the creation of the cube the unique ID, and color are set 
+    /// to random values that cannot be changed by the player. The mass of the cube increases as the
+    /// cube consumes food or other cubes. The cube's current location, visibility, and status are
+    /// tracked in the game. If the cube is no longer active, then it is considered dead.
     /// </summary>
     public class Cube
     {
@@ -25,13 +29,13 @@ namespace AgCubio
         /// The current x position of the top left corner of the cube.
         /// </summary>
         [JsonProperty("loc_x")]
-        public double xPos { get; set; }
+        public double xCoord { get; set; }
 
         /// <summary>
         /// The current y position of the top left corner of the cube.
         /// </summary>
         [JsonProperty("loc_y")]
-        public double yPos { get; set; }
+        public double yCoord { get; set; }
 
         /// <summary>
         /// The name of the cube (empty string if not a player i.e. food).
@@ -63,18 +67,98 @@ namespace AgCubio
         {
             id = uid;
             color = Color.FromArgb(argb_color);
-            xPos = x;
-            yPos = y;
+            xCoord = x;
+            yCoord = y;
             Name = name;
             Mass = mass;
             this.food = food;
         }
 
+        /// <summary>
+        /// Creates a new cube (for convenience).
+        /// </summary>
+        public Cube()
+        {
+            // TODO: Set defaults of the cube
+            Mass = 200;
+            xCoord = 0;
+            yCoord = 0;
+            id = 0;
+            Name = "hello";
+            color = Color.Black;
+            food = true;
+        }
+
+        /// <summary>
+        /// Returns the name and unique ID of this cube.
+        /// </summary>
         public override string ToString()
         {
-            string ret = "";
-            ret += xPos + " " + yPos + " " + Name + " " + food;
-            return ret;
+            return Name + " " + id;
+        }
+
+        /// <summary>
+        /// If this cube is within the field of view, it is visible and
+        /// returns true. Otherwise, it disappeared from the field of
+        /// view and returns false.
+        /// </summary>
+        [JsonIgnore]
+        public bool Visible { get; set; }
+
+        /// <summary>
+        /// If this cube is not visible and its mass is equal to 0, then
+        /// it is dead and returns true. Otherwise, this cube is still active and
+        /// returns true.
+        /// </summary>
+        [JsonIgnore]
+        public bool Dead;
+
+        /// <summary>
+        /// The current status of the cube.
+        /// </summary>
+        [JsonIgnore]
+        public string Status { get; private set; }
+
+        /// <summary>
+        /// The time of the last update of this cube's data.
+        /// </summary>
+        [JsonIgnore]
+        public float Last_Update;
+
+        /// <summary>
+        /// The last known distance from the top of the field of view.
+        /// </summary>
+        [JsonIgnore]
+        public int Top
+        {
+            get { return 0; } // TODO: Calculate "Top" Property
+        }
+
+        /// <summary>
+        /// The last known distance from the left of the field of view.
+        /// </summary>
+        [JsonIgnore]
+        public int Left
+        {
+            get { return 0; } // TODO: Calculate "Left" Property
+        }
+
+        /// <summary>
+        /// The last known distance from the right of the field of view.
+        /// </summary>
+        [JsonIgnore]
+        public int Right
+        {
+            get { return 0; } // TODO: Calculate "Right" Property
+        }
+
+        /// <summary>
+        /// The last known distance from the bottom of the field of view.
+        /// </summary>
+        [JsonIgnore]
+        public int Bottom
+        {
+            get { return 0; } // TODO: Calculate "Bottom" Property
         }
     }
 }
