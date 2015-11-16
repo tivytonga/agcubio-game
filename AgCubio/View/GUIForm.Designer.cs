@@ -29,7 +29,9 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.field_of_play = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -42,6 +44,7 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.BackColor = System.Drawing.Color.White;
+            this.splitContainer1.Panel1.Controls.Add(this.field_of_play);
             this.splitContainer1.Panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel1_Paint);
             this.splitContainer1.Panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.splitContainer1_Panel1_MouseMove);
             // 
@@ -53,6 +56,14 @@
             this.splitContainer1.SplitterDistance = 645;
             this.splitContainer1.TabIndex = 0;
             // 
+            // field_of_play
+            // 
+            this.field_of_play.Location = new System.Drawing.Point(3, 3);
+            this.field_of_play.Name = "field_of_play";
+            this.field_of_play.Size = new System.Drawing.Size(588, 448);
+            this.field_of_play.TabIndex = 0;
+            this.field_of_play.Paint += new System.Windows.Forms.PaintEventHandler(this.field_of_play_Paint);
+            // 
             // GUIForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -62,6 +73,7 @@
             this.Name = "GUIForm";
             this.Text = "AgCubio";
             this.Load += new System.EventHandler(this.GUIForm_Load);
+            this.splitContainer1.Panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -71,6 +83,7 @@
         #endregion
 
         private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.Panel field_of_play;
     }
 }
 

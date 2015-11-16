@@ -47,7 +47,7 @@ namespace View
         /// </summary>
         private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
         {
-            draw_Player_Cube(sender, e);
+            // TODO: Code the beginning screen where player enters their name and server
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace View
         {
             cube.xCoord = local.X;
             cube.yCoord = local.Y;
-            Invalidate();
+            this.Invalidate();
         }
 
         private void splitContainer1_Panel1_MouseMove(object sender, MouseEventArgs e)
@@ -101,6 +101,11 @@ namespace View
             cube.xCoord = e.X;
             cube.yCoord = e.Y;
             
+        }
+
+        private void field_of_play_Paint(object sender, PaintEventArgs e)
+        {
+            draw_Player_Cube(sender, e);
         }
 
 
