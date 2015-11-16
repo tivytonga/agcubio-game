@@ -56,7 +56,7 @@ namespace View
         private void draw_Player_Cube(object sender, PaintEventArgs e)
         {
             Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
-            SolidBrush brush = new SolidBrush(Color.Red);
+            SolidBrush brush = new SolidBrush(Color.FromName(cube.Color));
 
             // Draw cube
             e.Graphics.FillRectangle(brush, cube.xCoord, cube.yCoord, cube.Width, cube.Width);

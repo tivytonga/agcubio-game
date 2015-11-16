@@ -22,6 +22,7 @@ namespace Model
         {
             // TODO: Set defaults of the cube
             Mass = 200;
+            Color = "Green";
         }
    
         /// <summary>
@@ -42,7 +43,7 @@ namespace Model
         /// <summary>
         /// The color of this cube.
         /// </summary>
-        public string Color { get; set; }
+        public string Color { get; private set; }
 
         /// <summary>
         /// The name of this cube given by the player.
