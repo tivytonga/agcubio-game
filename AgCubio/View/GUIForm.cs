@@ -18,8 +18,13 @@ namespace View
         /// </summary>
         Model.World world;
         Model.Cube cube;
-        Point local;
+        Point local; // TODO: (Might not need this) Used to keep track of the mouse's location
 
+        /// <summary>
+        /// Constructor for AgCubio's GUI. Initializes World and Cube.
+        /// DoubleBuffered is set to true to avoid flickering.
+        /// The size of the Window is set to World's default.
+        /// </summary>
         public GUIForm()
         {
             InitializeComponent();
@@ -30,8 +35,9 @@ namespace View
         }
 
         /// <summary>
-        /// This is the form that holds the AgCubio game. The width and height of the Form window is set according
-        /// to the width and height parameters in World.
+        /// Called when the AgCubio game is opened. The width and height of the Form window is set according
+        /// to the width and height parameters in World. The timer starts and keeps track of when the panels
+        /// need to re-paint.
         /// </summary>
         private void GUIForm_Load(object sender, EventArgs e)
         {
@@ -51,10 +57,11 @@ namespace View
         }
 
         /// <summary>
-        /// Draws a cube that follows the cursor.
+        /// Draws a cube with the specified size and color.
         /// </summary>
         private void draw_Player_Cube(object sender, PaintEventArgs e)
         {
+            // Settings for the Rectangle and Brush
             Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
             SolidBrush brush = new SolidBrush(Color.FromName(cube.Color));
 
@@ -88,20 +95,22 @@ namespace View
             }
         }
 
-        private void main_Loop(object sender, EventArgs e)
-        {
-            cube.xCoord = local.X;
-            cube.yCoord = local.Y;
-            this.Invalidate();
-        }
-
+        /// <summary>
+        /// Called when the mouse moves within the game view panel.
+        /// </summary>
         private void splitContainer1_Panel1_MouseMove(object sender, MouseEventArgs e)
         {
             cube.xCoord = e.X;
             cube.yCoord = e.Y;
-            
         }
 
+        /// <summary>
+        /// This panel lies on top of the game view panel. This panel displays two textboxes:
+        /// Player Name textbox allows player to enter a name for their cube. 
+        /// Server allows player to enter the server to use for the gameplay.
+        /// After the player enters a Player Name and Server, this panel disappears and reveals
+        /// the game view panel.
+        /// </summary>
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
             panel1.Size = new Size(world.Width, world.Height);
@@ -123,7 +132,15 @@ namespace View
             }
         }
 
-
+        /// <summary>
+        /// Called by the timer when it is time to re-paint the form.
+        /// </summary>
+        private void main_Loop(object sender, EventArgs e)
+        {
+            cube.xCoord = local.X;
+            cube.yCoord = local.Y;
+            this.Invalidate();
+        }
 
     }
 }
