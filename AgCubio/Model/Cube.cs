@@ -68,13 +68,13 @@ namespace AgCubio
         /// Creates a cube with all of the given properties.
         /// </summary>
         [JsonConstructor]
-        public Cube(long uid, long team_id, int argb_color, double x, double y, string name, double mass, bool food) 
+        public Cube(double loc_x, double loc_y, int argb_color, long uid, long team_id, bool food, string name, double mass) 
         {
             id = uid;
             this.team_id = team_id;
             color = Color.FromArgb(argb_color);
-            xCoord = (int)x;
-            yCoord = (int)y;
+            xCoord = (int)loc_x;
+            yCoord = (int)loc_y;
             Name = name;
             Mass = mass;
             this.food = food;

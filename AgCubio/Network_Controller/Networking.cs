@@ -37,11 +37,43 @@ namespace AgCubio
             }
         }
 
-        public StringBuilder getData(int amount)
+        /// <summary>
+        /// Returns the up to the first "amount" characters of the currently received data, and removes
+        /// it from the PreservedState. If amount is more than the number of characters avaible, returns
+        /// as many as are available.
+        /// </summary>
+        // todo probably get rid of this
+        private string getData(int amount)
         {
             lock (sb)
             {
-                return sb.Remove(0, (amount > sb.Length? sb.Length: amount));
+                string ret = sb.ToString(0, amount);
+                sb.Remove(0, (amount > sb.Length ? sb.Length : amount));
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// Returns the next available line (i.e. ending in "\n") of data available and removes it
+        /// from the PreservedState. If a full line is unavailable, returns an empty string. Returned string
+        /// is always without the "\n".
+        /// </summary>
+        public string getLine()
+        {
+            lock (sb)
+            {
+                string ret = "";
+                for (int i = 0; i < sb.Length; i++)
+                {
+                    char curChar = sb[i];
+                    if (curChar == '\n')
+                    {
+                        sb.Remove(0, i + 1);
+                        return ret;
+                    }
+                    ret += curChar;
+                }
+                return "";
             }
         }
 

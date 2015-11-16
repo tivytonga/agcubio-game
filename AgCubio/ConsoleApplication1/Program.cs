@@ -1,0 +1,41 @@
+﻿using AgCubio;
+using System;
+using Newtonsoft.Json;
+using System.Text;
+
+public class Program
+{
+    static PreservedState state;
+    public static void Main(string[] args)
+    {
+        Console.WriteLine("Begin Connect");
+        state = Network.Connect_to_Server(() => rightAfterConnected(), "localhost");
+        Console.Read();
+    }
+
+    private static void rightAfterConnected()
+    {
+        Console.WriteLine("Connected.");
+        state.callback = () => wantMore();
+        Network.Send(state, "My_Name\n");
+        wantMore();
+    }
+
+    static int i = 0;
+    private static void wantMore()
+    {
+        if (i < 4)
+        {
+            string s = state.getLine();
+            if (s != "")
+            {
+                Console.WriteLine("Line: " + i);
+                Console.WriteLine("Raw text: " + s);
+                Cube cube = JsonConvert.DeserializeObject<Cube>(s);
+                Console.WriteLine("Cube name and id: " + cube.ToString());
+                i++;
+            }
+            Network.i_want_more_data(state);
+        }
+    }
+}
