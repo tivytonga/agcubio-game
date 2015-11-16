@@ -20,6 +20,7 @@ namespace View
         Model.Cube cube;
         Point local; // TODO: (Might not need this) Used to keep track of the mouse's location
 
+
         /// <summary>
         /// Constructor for AgCubio's GUI. Initializes World and Cube.
         /// DoubleBuffered is set to true to avoid flickering.
@@ -54,6 +55,13 @@ namespace View
         private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
         {
             // TODO: Code the beginning screen where player enters their name and server
+            // Settings for the Rectangle and Brush
+            Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
+            SolidBrush brush = new SolidBrush(Color.FromName(cube.Color));
+
+            // Draw cube
+            e.Graphics.FillRectangle(brush, cube.xCoord, cube.yCoord, cube.Width, cube.Width);
+            
         }
 
         /// <summary>
@@ -67,6 +75,7 @@ namespace View
 
             // Draw cube
             e.Graphics.FillRectangle(brush, cube.xCoord, cube.yCoord, cube.Width, cube.Width);
+            
         }
 
         /// <summary>
@@ -114,10 +123,6 @@ namespace View
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
             panel1.Size = new Size(world.Width, world.Height);
-
-            // TODO: If the player's user name and server have been accepted, 
-            //       then this panel can disappear since the main game panel is
-            //       underneath this panel. Use --> panel1.Visible = false;
         }
 
         /// <summary>
@@ -128,6 +133,14 @@ namespace View
         {
             if (e.KeyCode == Keys.Enter)
             {
+                /// Player entered data for Player Name and Server
+                if (!textBox1.Text.Equals("") && !textBox2.Text.Equals("")) // TODO: Check to make sure Server textbox has valid input
+                {
+                    cube.Name = textBox1.Text;
+                    panel1.Visible = false;
+                    Refresh();
+                }
+
                 // TODO: Take user's input and do something with it
             }
         }
@@ -137,9 +150,9 @@ namespace View
         /// </summary>
         private void main_Loop(object sender, EventArgs e)
         {
-            cube.xCoord = local.X;
-            cube.yCoord = local.Y;
-            this.Invalidate();
+                cube.xCoord = local.X;
+                cube.yCoord = local.Y;
+                splitContainer1.Refresh();
         }
 
     }
