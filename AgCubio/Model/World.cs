@@ -83,7 +83,8 @@ namespace Model
         {
             // TODO: Set the defaults for World constructor
             Width = 1000;
-            Height = 700;
+            Height = 500;
+            Heartbeats_Per_Second = 10 * 1000;
         }
 
         public World(int width, int height)

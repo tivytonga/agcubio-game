@@ -18,12 +18,15 @@ namespace View
         /// </summary>
         Model.World world;
         Model.Cube cube;
+        Point local;
 
         public GUIForm()
         {
             InitializeComponent();
             world = new Model.World();
             cube = new Model.Cube();
+            this.DoubleBuffered = true;
+            this.Size = new Size(world.Width, world.Height);
         }
 
         /// <summary>
@@ -32,7 +35,10 @@ namespace View
         /// </summary>
         private void GUIForm_Load(object sender, EventArgs e)
         {
-            this.Size = new Size(world.Width, world.Height);
+            Timer timer = new Timer();
+            timer.Interval = world.Heartbeats_Per_Second;
+            timer.Tick += new EventHandler(main_Loop);
+            timer.Start();
         }
 
         /// <summary>
@@ -49,13 +55,11 @@ namespace View
         /// </summary>
         private void draw_Player_Cube(object sender, PaintEventArgs e)
         {
-            Point local = this.PointToClient(Cursor.Position);
-
             Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
             SolidBrush brush = new SolidBrush(Color.Red);
 
             // Draw cube
-            e.Graphics.FillRectangle(brush, local.X, local.Y, cube.Width, cube.Width);
+            e.Graphics.FillRectangle(brush, cube.xCoord, cube.yCoord, cube.Width, cube.Width);
         }
 
         /// <summary>
@@ -65,10 +69,10 @@ namespace View
         private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
         {
             // Statistics from World displaying most current data
-            string statistics = "FPS: " + "?" + "\n\n"
-                              + "Food: " + "?" + "\n\n"
-                              + "Mass: " + "?" + "\n\n"
-                              + "Width: " + "?";
+            string statistics = "FPS: " + world.Heartbeats_Per_Second + "\n\n"
+                              + "Food: " + world.Max_Food + "\n\n"
+                              + "Mass: " + cube.Mass + "\n\n"
+                              + "Width: " + world.Width;
 
             using (Font font1 = new Font("Times New Roman", 11, FontStyle.Bold, GraphicsUnit.Point))
             {
@@ -84,10 +88,21 @@ namespace View
             }
         }
 
-        private void main_Loop()
-        {
 
+        private void main_Loop(object sender, EventArgs e)
+        {
+            cube.xCoord = local.X;
+            cube.yCoord = local.Y;
+            Invalidate();
         }
+
+        private void splitContainer1_Panel1_MouseMove(object sender, MouseEventArgs e)
+        {
+            cube.xCoord = e.X;
+            cube.yCoord = e.Y;
+            
+        }
+
 
 
     }
