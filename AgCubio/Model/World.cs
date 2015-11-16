@@ -13,6 +13,28 @@ namespace Model
     /// </summary>
     public class World
     {
+        /// <summary>
+        /// Creates a World with presets: width of 1000, height of 500, 
+        /// and Heartbeats_Per_Second of 100000.
+        /// </summary>
+        public World()
+        {
+            // TODO: Set the defaults for World constructor
+            Width = 1000;
+            Height = 500;
+            Heartbeats_Per_Second = 100000;
+        }
+
+        /// <summary>
+        /// Creates a World with given values for width and height.
+        /// </summary>
+        public World(int width, int height)
+        {
+            // TODO: Set the defaults for World constructor
+            Width = width;
+            Height = height;
+        }
+
         /// Variables for the properties of the World
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -75,26 +97,6 @@ namespace Model
         /// 
         /// </summary>
         public int Heartbeats_Per_Second { get; set; }
-
-        /// <summary>
-        /// Creates a World...
-        /// </summary>
-        public World()
-        {
-            // TODO: Set the defaults for World constructor
-            Width = 1000;
-            Height = 500;
-            Heartbeats_Per_Second = 10 * 1000;
-        }
-
-        public World(int width, int height)
-        {
-            // TODO: Set the defaults for World constructor
-            Width = width;
-            Height = height;
-        }
-
-
 
     }
 }

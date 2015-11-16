@@ -15,7 +15,14 @@ namespace Model
     /// </summary>
     public class Cube
     {
-        /// Variables for the properties of this cube.
+        /// <summary>
+        /// Creates a new cube.
+        /// </summary>
+        public Cube()
+        {
+            // TODO: Set defaults of the cube
+            Mass = 200;
+        }
    
         /// <summary>
         /// The unique ID associated with this cube.
@@ -70,15 +77,6 @@ namespace Model
         /// The time of the last update of this cube's data.
         /// </summary>
         public float Last_Update;
-
-        /// <summary>
-        /// Creates a new cube.
-        /// </summary>
-        public Cube()
-        {
-            // TODO: Set defaults of the cube
-            Mass = 50;
-        }
 
         /// <summary>
         /// The current width of this cube.
