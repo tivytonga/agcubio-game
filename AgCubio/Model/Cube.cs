@@ -84,7 +84,7 @@ namespace Model
         public int Width
         {
             get { return (int) Math.Sqrt(Mass); }
-            private set { Mass = value * 2; }
+            private set { Width = value;  Mass = value * value; }
         }
 
         /// <summary>
