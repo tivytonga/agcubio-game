@@ -88,7 +88,6 @@ namespace View
             }
         }
 
-
         private void main_Loop(object sender, EventArgs e)
         {
             cube.xCoord = local.X;
@@ -103,9 +102,25 @@ namespace View
             
         }
 
-        private void field_of_play_Paint(object sender, PaintEventArgs e)
+        private void panel1_Paint(object sender, PaintEventArgs e)
         {
-            draw_Player_Cube(sender, e);
+            panel1.Size = new Size(world.Width, world.Height);
+
+            // TODO: If the player's user name and server have been accepted, 
+            //       then this panel can disappear since the main game panel is
+            //       underneath this panel. Use --> panel1.Visible = false;
+        }
+
+        /// <summary>
+        /// Called when the 'Enter' key has been pressed after text has been
+        /// typed in the Player Name textbox.
+        /// </summary>
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                // TODO: Take user's input and do something with it
+            }
         }
 
 

@@ -72,7 +72,7 @@ namespace Model
         /// <summary>
         /// The current status of the cube.
         /// </summary>
-        public string Status;
+        public string Status { get; private set; }
 
         /// <summary>
         /// The time of the last update of this cube's data.
