@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -20,6 +21,9 @@ namespace AgCubio
         public const int BUFFER_SIZE = 1024;
         public StringBuilder sb;
 
+        public byte[] outgoingBuffer;
+        public string outgoingString;
+
         /// <summary>
         /// Begins the receiving of new data.
         /// </summary>
@@ -33,7 +37,8 @@ namespace AgCubio
         /// </summary>
         public void _BeginSend(byte[] outgoing)
         {
-            socket.BeginSend(outgoing, 0, outgoing.Length, SocketFlags.None, Network.SendCallback, this);
+            outgoingBuffer = outgoing;
+            socket.BeginSend(outgoingBuffer, 0, outgoing.Length, SocketFlags.None, Network.SendCallback, this);
         }
 
         public void _HandleData(Encoding enc, int read)
@@ -119,6 +124,11 @@ namespace AgCubio
         private static readonly object sendSync = new object();
 
         /// <summary>
+        ///  Records whether an asynchronous send attempt is ongoing
+        /// </summary>
+        private static bool sendIsOngoing = false;
+
+        /// <summary>
         /// Encoding used for incoming/outgoing data
         /// </summary>
         private static UTF8Encoding encoding = new UTF8Encoding();
@@ -176,32 +186,42 @@ namespace AgCubio
 
         /// <summary>
         /// Sends the given data over the network through the given socket.
-        /// This function (along with it's helper 'SendCallback') will allow a program to send data over a socket. 
-        /// This function needs to convert the data into bytes and then send them using socket.BeginSend.
+        /// This function (along with it's helpers 'SendBytes' and 'SendCallback') will allow a program to send data over a socket.
         /// </summary>
         public static void Send(PreservedState state, string data)
         {
-            byte[] outgoing = encoding.GetBytes(data);
+            //byte[] outgoing = encoding.GetBytes(data);
+            
             lock (sendSync)
             {
-                state._BeginSend(outgoing);
-            }
-            /*
-            //Looking over
-            // Get exclusive access to send mechanism
-            lock (sendSync)
-            {
-                // Append the message to the unsent string
-                outgoing += message;
-
-                // If there's not a send ongoing, start one.
+                state.outgoingString += data;
                 if (!sendIsOngoing)
                 {
                     sendIsOngoing = true;
-                    SendBytes();
+                    SendBytes(state);
                 }
             }
-            */
+        }
+
+        /// <summary>
+        /// Attempts to send the entire outgoing string.
+        /// </summary>
+        private static void SendBytes(PreservedState state)
+        {
+            if (state.outgoingString == "")
+            {
+                sendIsOngoing = false;
+
+                //Debug.WriteLine("Done sent.");
+            }
+            else
+            {
+                //Debug.WriteLine("Sending: " + state.outgoingString);
+
+                byte[] outgoingBuffer = encoding.GetBytes(state.outgoingString);
+                state.outgoingString = "";
+                state._BeginSend(outgoingBuffer);
+            }
         }
 
         /// <summary>
@@ -210,7 +230,30 @@ namespace AgCubio
         public static void SendCallback(IAsyncResult stateInResult)
         {
             PreservedState state = (PreservedState)stateInResult.AsyncState;
-            state.socket.EndSend(stateInResult);
+
+            // number of bytes that actually got send
+            int bytes = state.socket.EndSend(stateInResult);
+            
+            lock (sendSync)
+            {
+                // Get the bytes that we attempted to send
+                byte[] outgoingBuffer = state.outgoingBuffer;
+
+                // The socket has been closed
+                if (bytes == 0)
+                {
+                    state.socket.Close();
+                    //Debug.WriteLine("Socket closed");
+                }
+
+                // Prepend the unsent bytes and try sending again.
+                else
+                {
+                    state.outgoingString = encoding.GetString(outgoingBuffer, bytes,
+                                                  outgoingBuffer.Length - bytes) + state.outgoingString;
+                    SendBytes(state);
+                }
+            }
         }
     }
 }

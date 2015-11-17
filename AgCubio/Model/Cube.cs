@@ -47,7 +47,7 @@ namespace AgCubio
         /// </summary>
         [JsonProperty]
         public string Name { get; set; }
-            
+
         /// <summary>
         /// The current mass of the cube.
         /// </summary>
@@ -57,7 +57,7 @@ namespace AgCubio
         /// Whether or not the cube is food (not a player).
         /// </summary>
         public bool food { get; }
-        
+
         /// <summary>
         /// The width of the cube (square root of the mass).
         /// </summary>
@@ -68,7 +68,7 @@ namespace AgCubio
         /// Creates a cube with all of the given properties.
         /// </summary>
         [JsonConstructor]
-        public Cube(double loc_x, double loc_y, int argb_color, long uid, long team_id, bool food, string name, double mass) 
+        public Cube(double loc_x, double loc_y, int argb_color, long uid, long team_id, bool food, string name, double mass)
         {
             id = uid;
             this.team_id = team_id;
@@ -95,6 +95,24 @@ namespace AgCubio
             food = true;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Cube)) return false;
+            return (this == (Cube)obj);
+        }
+
+        public static bool operator == (Cube first, Cube other)
+        {
+            if (other.Name == first.Name && other.color == first.color && other.id == first.id && other.team_id == first.team_id)
+                return true;
+            return false;
+        }
+
+        public static bool operator !=(Cube first, Cube other) {
+            return !(first == other);
+        }
+
+
         /// <summary>
         /// Returns the name and unique ID of this cube.
         /// </summary>
@@ -103,71 +121,72 @@ namespace AgCubio
             return Name + " " + id;
         }
 
-        /// <summary>
-        /// If this cube is within the field of view, it is visible and
-        /// returns true. Otherwise, it disappeared from the field of
-        /// view and returns false.
-        /// </summary>
-        [JsonIgnore]
-        public bool Visible { get; set; }
-
-        /// <summary>
-        /// If this cube is not visible and its mass is equal to 0, then
-        /// it is dead and returns true. Otherwise, this cube is still active and
-        /// returns true.
-        /// </summary>
-        [JsonIgnore]
-        public bool Dead;
-
-        /// <summary>
-        /// The current status of the cube.
-        /// </summary>
-        [JsonIgnore]
-        public string Status { get; private set; }
-
-        /// <summary>
-        /// The time of the last update of this cube's data.
-        /// </summary>
-        [JsonIgnore]
-        public float Last_Update;
-
-
         /** are the below needed?
-        /// <summary>
-        /// The last known distance from the top of the field of view.
-        /// </summary>
-        [JsonIgnore]
-        public int Top
-        {
-            get { return 0; } // TODO: Calculate "Top" Property
-        }
+       /// <summary>
+       /// If this cube is within the field of view, it is visible and
+       /// returns true. Otherwise, it disappeared from the field of
+       /// view and returns false.
+       /// </summary>
+       [JsonIgnore]
+       public bool Visible { get; set; }
 
-        /// <summary>
-        /// The last known distance from the left of the field of view.
-        /// </summary>
-        [JsonIgnore]
-        public int Left
-        {
-            get { return 0; } // TODO: Calculate "Left" Property
-        }
+       /// <summary>
+       /// If this cube is not visible and its mass is equal to 0, then
+       /// it is dead and returns true. Otherwise, this cube is still active and
+       /// returns true.
+       /// </summary>
+       [JsonIgnore]
+       public bool Dead;
 
-        /// <summary>
-        /// The last known distance from the right of the field of view.
-        /// </summary>
-        [JsonIgnore]
-        public int Right
-        {
-            get { return 0; } // TODO: Calculate "Right" Property
-        }
+       /// <summary>
+       /// The current status of the cube.
+       /// </summary>
+       [JsonIgnore]
+       public string Status { get; private set; }
 
-        /// <summary>
-        /// The last known distance from the bottom of the field of view.
-        /// </summary>
-        [JsonIgnore]
-        public int Bottom
-        {
-            get { return 0; } // TODO: Calculate "Bottom" Property
-        }
-    **/
+       /// <summary>
+       /// The time of the last update of this cube's data.
+       /// </summary>
+       [JsonIgnore]
+       public float Last_Update;
+
+
+      
+       /// <summary>
+       /// The last known distance from the top of the field of view.
+       /// </summary>
+       [JsonIgnore]
+       public int Top
+       {
+           get { return 0; } // TODO: Calculate "Top" Property
+       }
+
+       /// <summary>
+       /// The last known distance from the left of the field of view.
+       /// </summary>
+       [JsonIgnore]
+       public int Left
+       {
+           get { return 0; } // TODO: Calculate "Left" Property
+       }
+
+       /// <summary>
+       /// The last known distance from the right of the field of view.
+       /// </summary>
+       [JsonIgnore]
+       public int Right
+       {
+           get { return 0; } // TODO: Calculate "Right" Property
+       }
+
+       /// <summary>
+       /// The last known distance from the bottom of the field of view.
+       /// </summary>
+       [JsonIgnore]
+       public int Bottom
+       {
+           get { return 0; } // TODO: Calculate "Bottom" Property
+       }
+   **/
     }
 }

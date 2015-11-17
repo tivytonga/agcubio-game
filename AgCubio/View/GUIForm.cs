@@ -23,6 +23,8 @@ namespace View
         Cube playerCube;
         PreservedState state;
         Timer timer;
+        Font cubeNamesFont;
+        Font infoContainerFont;
         bool INGAME; // whether or not the game part itself has started
 
 
@@ -37,8 +39,10 @@ namespace View
             world = new World();
             playerCube = new Cube();
             DoubleBuffered = true;
-            Size = new Size(world.Width, world.Height);
+            Size = new Size(world.Width, world.Height); // todo only want actual game part of display to be that size
             INGAME = false;
+            cubeNamesFont = new Font("Times New Roman", 14);
+            infoContainerFont = new Font("Times New Roman", 11, FontStyle.Bold);
         }
 
         /// <summary>
@@ -72,6 +76,11 @@ namespace View
 
                         // Draw cube
                         e.Graphics.FillRectangle(brush, rect);
+
+                        if (!cube.food)
+                        {
+                            e.Graphics.DrawString(cube.Name, cubeNamesFont, Brushes.Yellow, cube.xCoord, cube.yCoord);
+                        }
                     }
                 }
                 //Invalidate();
@@ -90,19 +99,15 @@ namespace View
                               + "Food: " + "?" + "\n\n" // TODO: Calculate # of food on the screen
                               + "Mass: " + playerCube.Mass + "\n\n"
                               + "Width: " + world.Width;
+            Rectangle rect1 = new Rectangle(10, 10, 130, 140);
 
-            using (Font font1 = new Font("Times New Roman", 11, FontStyle.Bold, GraphicsUnit.Point))
-            {
-                Rectangle rect1 = new Rectangle(10, 10, 130, 140);
+            // Create a StringFormat object and specify format (left-allign)
+            StringFormat stringFormat = new StringFormat();
+            stringFormat.Alignment = StringAlignment.Near;
+            stringFormat.LineAlignment = StringAlignment.Near;
 
-                // Create a StringFormat object and specify format (left-allign)
-                StringFormat stringFormat = new StringFormat();
-                stringFormat.Alignment = StringAlignment.Near;
-                stringFormat.LineAlignment = StringAlignment.Near;
-
-                // Draw the text and the surrounding rectangle.
-                e.Graphics.DrawString(statistics, font1, Brushes.Black, rect1, stringFormat);
-            }
+            // Draw the text and the surrounding rectangle.
+            e.Graphics.DrawString(statistics, infoContainerFont, Brushes.Black, rect1, stringFormat);
             //Invalidate();
         }
 
@@ -111,9 +116,8 @@ namespace View
         /// </summary>
         private void splitContainer1_Panel1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (INGAME) return;
-                //Network.Send(state, "(move, " + e.X + ", " + e.Y + ")\n");
-                //todo fix network for buffered sending
+            if (INGAME)
+                Network.Send(state, "(move, " + e.X + ", " + e.Y + ")\n");
         }
 
         /// <summary>
@@ -145,7 +149,6 @@ namespace View
 
                     //todo error checking
                     state = Network.Connect_to_Server(() => InitialConnection(), ServerTextBox.Text);
-                    INGAME = true;
                 }
 
                 // TODO: Take user's input and do something with it
@@ -158,7 +161,7 @@ namespace View
         private void main_Loop(object sender, EventArgs e)
         {
             splitContainer1.Refresh();
-            Debug.WriteLine("Refreshing!!!!!!"); //todo not reaching this
+            Debug.WriteLine("Refreshing!!!!!!"); //todo not doing this
         }
 
         /// <summary>
@@ -178,6 +181,7 @@ namespace View
         /// </summary>
         private void WantMoreData()
         {
+            INGAME = true;
             // Must avoid adding to world while reading through cubes, for example
             lock (world)
             {

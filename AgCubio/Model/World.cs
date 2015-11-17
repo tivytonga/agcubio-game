@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,19 @@ namespace AgCubio
         /// </summary>
         private HashSet<Cube> cubes;
 
+        private class CubeComp : IEqualityComparer<Cube>
+        {
+            public bool Equals(Cube x, Cube y)
+            {
+                return (x == y);
+            }
+
+            public int GetHashCode(Cube obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+
         /// <summary>
         /// Creates a World with presets: width of 1000, height of 500, 
         /// and Heartbeats_Per_Second of 100000.
@@ -31,12 +45,18 @@ namespace AgCubio
 
         public IEnumerable<Cube> Cubes()
         {
-            return cubes.AsEnumerable<Cube>();
+            return cubes.AsEnumerable();
         }
 
+        //todo probably change this
         public void AddCube(Cube cube)
         {
-            cubes.Add(cube);
+            if (!cubes.Contains(cube, new CubeComp()))
+                cubes.Add(cube);
+            else {
+                cubes.Remove(cube);
+                cubes.Add(cube);
+            }
         }
 
         /// Variables for the properties of the World
