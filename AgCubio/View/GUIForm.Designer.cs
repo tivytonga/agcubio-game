@@ -32,8 +32,8 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.ServerTextBox = new System.Windows.Forms.TextBox();
+            this.PlayerNameTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -67,8 +67,8 @@
             this.panel1.BackColor = System.Drawing.Color.LightGray;
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.textBox2);
-            this.panel1.Controls.Add(this.textBox1);
+            this.panel1.Controls.Add(this.ServerTextBox);
+            this.panel1.Controls.Add(this.PlayerNameTextBox);
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
@@ -96,27 +96,27 @@
             this.label1.TabIndex = 2;
             this.label1.Text = "Player Name";
             // 
-            // textBox2
+            // ServerTextBox
             // 
-            this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.textBox2.Location = new System.Drawing.Point(335, 197);
-            this.textBox2.MaximumSize = new System.Drawing.Size(200, 50);
-            this.textBox2.MinimumSize = new System.Drawing.Size(100, 40);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(200, 30);
-            this.textBox2.TabIndex = 1;
-            this.textBox2.Text = "localhost";
+            this.ServerTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.ServerTextBox.Location = new System.Drawing.Point(335, 197);
+            this.ServerTextBox.MaximumSize = new System.Drawing.Size(200, 50);
+            this.ServerTextBox.MinimumSize = new System.Drawing.Size(100, 40);
+            this.ServerTextBox.Name = "ServerTextBox";
+            this.ServerTextBox.Size = new System.Drawing.Size(200, 30);
+            this.ServerTextBox.TabIndex = 1;
+            this.ServerTextBox.Text = "localhost";
             // 
-            // textBox1
+            // PlayerNameTextBox
             // 
-            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.textBox1.Location = new System.Drawing.Point(335, 137);
-            this.textBox1.MaximumSize = new System.Drawing.Size(200, 100);
-            this.textBox1.MinimumSize = new System.Drawing.Size(100, 40);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(200, 30);
-            this.textBox1.TabIndex = 0;
-            this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
+            this.PlayerNameTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.PlayerNameTextBox.Location = new System.Drawing.Point(335, 137);
+            this.PlayerNameTextBox.MaximumSize = new System.Drawing.Size(200, 100);
+            this.PlayerNameTextBox.MinimumSize = new System.Drawing.Size(100, 40);
+            this.PlayerNameTextBox.Name = "PlayerNameTextBox";
+            this.PlayerNameTextBox.Size = new System.Drawing.Size(200, 30);
+            this.PlayerNameTextBox.TabIndex = 0;
+            this.PlayerNameTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
             // 
             // GUIForm
             // 
@@ -140,8 +140,8 @@
 
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox ServerTextBox;
+        private System.Windows.Forms.TextBox PlayerNameTextBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
     }

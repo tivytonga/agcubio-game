@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 namespace AgCubio
 {
     /// <summary>
-    /// 
+    /// Represents a state that is passed between socket methods.
+    /// Any methods starting with _ are advised to be called only internally.
     /// </summary>
     public class PreservedState
     {
@@ -18,18 +19,24 @@ namespace AgCubio
         public byte[] buffer;
         public const int BUFFER_SIZE = 1024;
         public StringBuilder sb;
-        
-        public void BeginReceive()
+
+        /// <summary>
+        /// Begins the receiving of new data.
+        /// </summary>
+        public void _BeginReceive()
         {
             socket.BeginReceive(buffer, 0, BUFFER_SIZE, SocketFlags.None, Network.ReceiveCallback, this);
         }
 
-        public void BeginSend(byte[] outgoing)
+        /// <summary>
+        /// Begins the sending of the given byte[] of data.
+        /// </summary>
+        public void _BeginSend(byte[] outgoing)
         {
             socket.BeginSend(outgoing, 0, outgoing.Length, SocketFlags.None, Network.SendCallback, this);
         }
 
-        public void HandleData(Encoding enc, int read)
+        public void _HandleData(Encoding enc, int read)
         {
             lock(sb)
             {
@@ -77,6 +84,22 @@ namespace AgCubio
             }
         }
 
+        /// <summary>
+        /// Returns all available, non-empty lines of data.
+        /// </summary>
+        public IEnumerable<string> getLines()
+        {
+            lock (sb)
+            {
+                string s = getLine();
+                while (s != "")
+                {
+                    yield return s;
+                    s = getLine();
+                }
+            }
+        }
+
         public PreservedState(Action callback, Socket socket)
         {
             this.callback = callback;
@@ -91,14 +114,14 @@ namespace AgCubio
         public const int DEFAULT_PORT = 11000;
 
         /// <summary>
-        /// Encoding used for incoming/outgoing data
-        /// </summary>
-        private static UTF8Encoding encoding = new UTF8Encoding();
-
-        /// <summary>
         /// For synchronizing sends (does nothing)
         /// </summary>
         private static readonly object sendSync = new object();
+
+        /// <summary>
+        /// Encoding used for incoming/outgoing data
+        /// </summary>
+        private static UTF8Encoding encoding = new UTF8Encoding();
 
         /// <summary>
         /// Attempts to connect to the server via the provided hostname. Calls the given callback function upon connection.
@@ -138,18 +161,17 @@ namespace AgCubio
             }
             else
             {
-                state.HandleData(encoding, read);
+                state._HandleData(encoding, read);
                 state.callback();
             }
         }
 
-        // Useless? have user call state.BeginReceive() theirself
         /// <summary>
         /// Begins the receiving of data.
         /// </summary>
         public static void i_want_more_data(PreservedState state)
         {
-            state.BeginReceive();
+            state._BeginReceive();
         }
 
         /// <summary>
@@ -160,7 +182,10 @@ namespace AgCubio
         public static void Send(PreservedState state, string data)
         {
             byte[] outgoing = encoding.GetBytes(data);
-            state.BeginSend(outgoing);
+            lock (sendSync)
+            {
+                state._BeginSend(outgoing);
+            }
             /*
             //Looking over
             // Get exclusive access to send mechanism

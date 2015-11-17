@@ -12,9 +12,9 @@ namespace AgCubio
     public class World
     {
         /// <summary>
-        /// All of the cubes in the world.
+        /// All of the cubes in the world. Map uid into Cube.
         /// </summary>
-        private Dictionary<long, Cube> cubes;
+        private HashSet<Cube> cubes;
 
         /// <summary>
         /// Creates a World with presets: width of 1000, height of 500, 
@@ -26,16 +26,17 @@ namespace AgCubio
             Width = 1000;
             Height = 500;
             Heartbeats_Per_Second = 100000;
+            cubes = new HashSet<Cube>();
         }
 
-        /// <summary>
-        /// Creates a World with given values for width and height.
-        /// </summary>
-        public World(int width, int height)
+        public IEnumerable<Cube> Cubes()
         {
-            // TODO: Set the defaults for World constructor
-            Width = width;
-            Height = height;
+            return cubes.AsEnumerable<Cube>();
+        }
+
+        public void AddCube(Cube cube)
+        {
+            cubes.Add(cube);
         }
 
         /// Variables for the properties of the World

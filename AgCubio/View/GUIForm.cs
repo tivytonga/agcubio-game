@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AgCubio;
+using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace View
 {
@@ -18,8 +20,10 @@ namespace View
         /// Cube is used to set all the properties of the player's cube.
         /// </summary>
         World world;
-        Cube cube;
-        Point local; // TODO: (Might not need this) Used to keep track of the mouse's location
+        Cube playerCube;
+        PreservedState state;
+        Timer timer;
+        bool INGAME; // whether or not the game part itself has started
 
 
         /// <summary>
@@ -31,9 +35,10 @@ namespace View
         {
             InitializeComponent();
             world = new World();
-            cube = new Cube();
+            playerCube = new Cube();
             DoubleBuffered = true;
             Size = new Size(world.Width, world.Height);
+            INGAME = false;
         }
 
         /// <summary>
@@ -43,7 +48,7 @@ namespace View
         /// </summary>
         private void GUIForm_Load(object sender, EventArgs e)
         {
-            Timer timer = new Timer();
+            timer = new Timer();
             timer.Interval = world.Heartbeats_Per_Second;
             timer.Tick += new EventHandler(main_Loop);
             timer.Start();
@@ -55,28 +60,23 @@ namespace View
         /// </summary>
         private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
         {
-            // TODO: Code the beginning screen where player enters their name and server
-            // Settings for the Rectangle and Brush
-            Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
-            SolidBrush brush = new SolidBrush(cube.color);
+            if (INGAME)
+            {
+                lock (world)
+                {
+                    foreach (Cube cube in world.Cubes())
+                    {
+                        // Settings for the Rectangle and Brush
+                        Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
+                        SolidBrush brush = new SolidBrush(cube.color);
 
-            // Draw cube
-            e.Graphics.FillRectangle(brush, cube.xCoord, cube.yCoord, cube.Width, cube.Width);
-            
-        }
-
-        /// <summary>
-        /// Draws a cube with the specified size and color.
-        /// </summary>
-        private void draw_Player_Cube(object sender, PaintEventArgs e)
-        {
-            // Settings for the Rectangle and Brush
-            Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
-            SolidBrush brush = new SolidBrush(cube.color);
-
-            // Draw cube
-            e.Graphics.FillRectangle(brush, cube.xCoord, cube.yCoord, cube.Width, cube.Width);
-            
+                        // Draw cube
+                        e.Graphics.FillRectangle(brush, rect);
+                    }
+                }
+                //Invalidate();
+            }
+            // TODO: Code the beginning screen where player enters their name and server (?)
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace View
             // Statistics from World displaying most current data
             string statistics = "FPS: " + "?" + "\n\n" // TODO: Calculate FPS
                               + "Food: " + "?" + "\n\n" // TODO: Calculate # of food on the screen
-                              + "Mass: " + cube.Mass + "\n\n"
+                              + "Mass: " + playerCube.Mass + "\n\n"
                               + "Width: " + world.Width;
 
             using (Font font1 = new Font("Times New Roman", 11, FontStyle.Bold, GraphicsUnit.Point))
@@ -103,6 +103,7 @@ namespace View
                 // Draw the text and the surrounding rectangle.
                 e.Graphics.DrawString(statistics, font1, Brushes.Black, rect1, stringFormat);
             }
+            //Invalidate();
         }
 
         /// <summary>
@@ -110,8 +111,9 @@ namespace View
         /// </summary>
         private void splitContainer1_Panel1_MouseMove(object sender, MouseEventArgs e)
         {
-            cube.xCoord = e.X;
-            cube.yCoord = e.Y;
+            if (INGAME) return;
+                //Network.Send(state, "(move, " + e.X + ", " + e.Y + ")\n");
+                //todo fix network for buffered sending
         }
 
         /// <summary>
@@ -135,11 +137,15 @@ namespace View
             if (e.KeyCode == Keys.Enter)
             {
                 /// Player entered data for Player Name and Server
-                if (!textBox1.Text.Equals("") && !textBox2.Text.Equals("")) // TODO: Check to make sure Server textbox has valid input
+                if (!PlayerNameTextBox.Text.Equals("") && !ServerTextBox.Text.Equals("")) // TODO: Check to make sure Server textbox has valid input
                 {
-                    cube.Name = textBox1.Text;
+                    playerCube.Name = PlayerNameTextBox.Text;
                     panel1.Visible = false;
                     Refresh();
+
+                    //todo error checking
+                    state = Network.Connect_to_Server(() => InitialConnection(), ServerTextBox.Text);
+                    INGAME = true;
                 }
 
                 // TODO: Take user's input and do something with it
@@ -151,9 +157,41 @@ namespace View
         /// </summary>
         private void main_Loop(object sender, EventArgs e)
         {
-                cube.xCoord = local.X;
-                cube.yCoord = local.Y;
-                splitContainer1.Refresh();
+            splitContainer1.Refresh();
+            Debug.WriteLine("Refreshing!!!!!!"); //todo not reaching this
+        }
+
+        /// <summary>
+        /// Called when first connected to the server. Sends off cube name, and waits
+        /// for server to return data about it.
+        /// </summary>
+        private void InitialConnection()
+        {
+            state.callback = () => WantMoreData();
+            Network.Send(state, playerCube.Name+"\n");
+            WantMoreData();
+        }
+
+        /// <summary>
+        /// Called after receiving any data from the server. Asks for more data.
+        /// Adds any cubes known to the world.
+        /// </summary>
+        private void WantMoreData()
+        {
+            // Must avoid adding to world while reading through cubes, for example
+            lock (world)
+            {
+                foreach (string datum in state.getLines())
+                {
+                    Cube cube = JsonConvert.DeserializeObject<Cube>(datum);
+                    world.AddCube(cube);
+                    if (cube.Name == playerCube.Name)
+                    {
+                        playerCube = cube;
+                    }
+                }
+            }
+            Network.i_want_more_data(state);
         }
 
     }

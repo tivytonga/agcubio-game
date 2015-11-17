@@ -24,17 +24,19 @@ public class Program
     static int i = 0;
     private static void wantMore()
     {
-        if (i < 4)
+        if (i < 2)
         {
-            string s = state.getLine();
-            if (s != "")
+            Console.WriteLine(i);
+            int k = 0;
+            foreach (string s in state.getLines())
             {
-                Console.WriteLine("Line: " + i);
+                Console.WriteLine("Line: " + k);
                 Console.WriteLine("Raw text: " + s);
                 Cube cube = JsonConvert.DeserializeObject<Cube>(s);
                 Console.WriteLine("Cube name and id: " + cube.ToString());
-                i++;
+                k++;
             }
+            i++;
             Network.i_want_more_data(state);
         }
     }
