@@ -6,6 +6,16 @@
  * 17 November 2015
  
  
+ 
+ KNOWN ISSUES
+ ------------
+ -Subwindow/Viewport: not yet implemented
+ -Space key event not working (so cannot split cube)
+ -No restarting after death
+ -Panel needs DoubleBuffering to prevent flickering
+ -Not properly displaying all cubes
+
+
  INTRODUCTION
  ------------
  
