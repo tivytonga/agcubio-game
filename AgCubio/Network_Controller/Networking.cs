@@ -155,6 +155,8 @@ namespace AgCubio
         {
             PreservedState state = (PreservedState)stateInResult.AsyncState;
             state.callback();
+            if (!state.socket.Connected)
+                return;
             state.socket.EndConnect(stateInResult);
         }
 

@@ -145,10 +145,7 @@ namespace View
                 if (!PlayerNameTextBox.Text.Equals("") && !ServerTextBox.Text.Equals("")) // TODO: Check to make sure Server textbox has valid input
                 {
                     playerCube.Name = PlayerNameTextBox.Text;
-                    panel1.Visible = false;
-                    Refresh();
-
-                    //todo error checking
+                    
                     state = Network.Connect_to_Server(() => InitialConnection(), ServerTextBox.Text);
                 }
 
@@ -161,6 +158,8 @@ namespace View
         /// </summary>
         private void main_Loop(object sender, EventArgs e)
         {
+            if (INGAME)
+                panel1.Visible = false;
             splitContainer1.Refresh();
         }
 
@@ -170,6 +169,11 @@ namespace View
         /// </summary>
         private void InitialConnection()
         {
+            if (!state.socket.Connected)
+            {
+                MessageBox.Show("Error: not connected to server.");
+                return;
+            }
             state.callback = () => WantMoreData();
             Network.Send(state, playerCube.Name+"\n");
             WantMoreData();
