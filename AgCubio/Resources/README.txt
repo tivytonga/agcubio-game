@@ -60,8 +60,10 @@
 	   * Player Name
 	   * Server (default: localhost)
  * Added code in View to set up connection to Server: Network.Send, Network.i_want_more_data
+ * Added Json attributes in Cube and World classes
 
  -- 4.0 --
  * Added a boolean to keep track of when the player is connected to a server and ready 
    to play
  * Sockets and connections work
+ * Updated GUI for displaying cubes
