@@ -38,11 +38,15 @@ namespace View
             InitializeComponent();
             world = new World();
             playerCube = new Cube();
-            DoubleBuffered = true;
+            // todo need to apply DoubleBuffered = true to panel1
+
             Size = new Size(world.Width, world.Height); // todo only want actual game part of display to be that size
             INGAME = false;
             cubeNamesFont = new Font("Times New Roman", 14);
             infoContainerFont = new Font("Times New Roman", 11, FontStyle.Bold);
+            
+            KeyDown += gameKeyDown;
+            splitContainer1.KeyDown += gameKeyDown;
         }
 
         /// <summary>
@@ -54,13 +58,13 @@ namespace View
         {
             timer = new Timer();
             timer.Interval = world.Heartbeats_Per_Second;
-            timer.Tick += new EventHandler(main_Loop);
+            timer.Tick += main_Loop;
             timer.Start();
         }
 
         /// <summary>
         /// This container displays the field of play. Food and players' cubes are in this container
-        /// performing various allowed activies: moving, moving over food, and moving over smaller cubes.
+        /// performing various allowed activities: moving, moving over food, and moving over smaller cubes.
         /// </summary>
         private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
         {
@@ -83,9 +87,7 @@ namespace View
                         }
                     }
                 }
-                //Invalidate();
             }
-            // TODO: Code the beginning screen where player enters their name and server (?)
         }
 
         /// <summary>
@@ -108,7 +110,6 @@ namespace View
 
             // Draw the text and the surrounding rectangle.
             e.Graphics.DrawString(statistics, infoContainerFont, Brushes.Black, rect1, stringFormat);
-            //Invalidate();
         }
 
         /// <summary>
@@ -161,7 +162,6 @@ namespace View
         private void main_Loop(object sender, EventArgs e)
         {
             splitContainer1.Refresh();
-            Debug.WriteLine("Refreshing!!!!!!"); //todo not doing this
         }
 
         /// <summary>
@@ -183,8 +183,10 @@ namespace View
         {
             INGAME = true;
             // Must avoid adding to world while reading through cubes, for example
+            
             lock (world)
             {
+                world.cubes.Clear();
                 foreach (string datum in state.getLines())
                 {
                     Cube cube = JsonConvert.DeserializeObject<Cube>(datum);
@@ -192,11 +194,27 @@ namespace View
                     if (cube.Name == playerCube.Name)
                     {
                         playerCube = cube;
+                        if (playerCube.Mass == 0)
+                        {
+                            MessageBox.Show("You have died!");
+                        }
                     }
                 }
             }
             Network.i_want_more_data(state);
         }
 
+        /// <summary>
+        /// Called when a key is pressed. If it is the spacebar, sends a 'split' request to the server.
+        /// </summary>
+        private void gameKeyDown(object sender, KeyEventArgs e)
+        {
+            //todo method not being called........ fix this
+            if (e.KeyData == Keys.Space)
+            {
+                if (INGAME)
+                    Network.Send(state, "(split, " + playerCube.xCoord + ", " + playerCube.yCoord + ")\n");
+            }
+        }
     }
 }

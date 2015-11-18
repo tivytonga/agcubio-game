@@ -103,7 +103,7 @@ namespace AgCubio
 
         public static bool operator == (Cube first, Cube other)
         {
-            if (other.Name == first.Name && other.color == first.color && other.id == first.id && other.team_id == first.team_id)
+            if (other.Name == first.Name && other.color == first.color && other.id == first.id)
                 return true;
             return false;
         }

@@ -13,9 +13,27 @@ namespace AgCubio
     public class World
     {
         /// <summary>
-        /// All of the cubes in the world. Map uid into Cube.
+        /// All of the cubes in the world.
         /// </summary>
-        private HashSet<Cube> cubes;
+        public HashSet<Cube> cubes;
+
+        /// <summary>
+        /// Creates a World with presets: width of 1000, height of 500, 
+        /// and Heartbeats_Per_Second of 25.
+        /// </summary>
+        public World()
+        {
+            // TODO: Set the defaults for World constructor
+            Width = 1000;
+            Height = 500;
+            Heartbeats_Per_Second = 25;
+            cubes = new HashSet<Cube>();
+        }
+
+        public IEnumerable<Cube> Cubes()
+        {
+            return cubes.AsEnumerable();
+        }
 
         private class CubeComp : IEqualityComparer<Cube>
         {
@@ -28,24 +46,6 @@ namespace AgCubio
             {
                 return obj.GetHashCode();
             }
-        }
-
-        /// <summary>
-        /// Creates a World with presets: width of 1000, height of 500, 
-        /// and Heartbeats_Per_Second of 100000.
-        /// </summary>
-        public World()
-        {
-            // TODO: Set the defaults for World constructor
-            Width = 1000;
-            Height = 500;
-            Heartbeats_Per_Second = 100000;
-            cubes = new HashSet<Cube>();
-        }
-
-        public IEnumerable<Cube> Cubes()
-        {
-            return cubes.AsEnumerable();
         }
 
         //todo probably change this
