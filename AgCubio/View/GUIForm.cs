@@ -190,7 +190,7 @@ namespace View
             
             lock (world)
             {
-                world.cubes.Clear();
+                world.Cubes.Clear();
                 foreach (string datum in state.getLines())
                 {
                     Cube cube = JsonConvert.DeserializeObject<Cube>(datum);

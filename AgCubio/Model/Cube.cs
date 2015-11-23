@@ -45,7 +45,6 @@ namespace AgCubio
         /// <summary>
         /// The name of the cube (empty string if not a player i.e. food).
         /// </summary>
-        [JsonProperty]
         public string Name { get; set; }
 
         /// <summary>

@@ -13,9 +13,12 @@ namespace AgCubio
     public class World
     {
         /// <summary>
-        /// All of the cubes in the world.
+        /// Maps from id to Cube. Every Cube in the World.
         /// </summary>
-        public HashSet<Cube> cubes;
+        private Dictionary<long, Cube> cubes = new Dictionary<long, Cube>();
+
+        public long foodCount = 0;
+        public long playerCount = 0;
 
         /// <summary>
         /// Creates a World with presets: width of 1000, height of 500, 
@@ -23,40 +26,44 @@ namespace AgCubio
         /// </summary>
         public World()
         {
-            // TODO: Set the defaults for World constructor
             Width = 1000;
             Height = 500;
             Heartbeats_Per_Second = 25;
-            cubes = new HashSet<Cube>();
         }
 
-        public IEnumerable<Cube> Cubes()
+        /// <summary>
+        /// Returns all the cubes in the world, mapping id to Cube object.
+        /// </summary>
+        public Dictionary<long, Cube> getCubes()
         {
-            return cubes.AsEnumerable();
+            return cubes;
         }
 
-        private class CubeComp : IEqualityComparer<Cube>
-        {
-            public bool Equals(Cube x, Cube y)
-            {
-                return (x == y);
-            }
-
-            public int GetHashCode(Cube obj)
-            {
-                return obj.GetHashCode();
-            }
-        }
-
-        //todo probably change this
+        /// <summary>
+        /// Adds the given cube to World if not already existing. If existing, then
+        /// updates its info. Also updates foodCount and playerCount if applicable.
+        /// If mass is 0, deletes the cube.
+        /// </summary>
         public void AddCube(Cube cube)
         {
-            if (!cubes.Contains(cube, new CubeComp()))
-                cubes.Add(cube);
-            else {
-                cubes.Remove(cube);
-                cubes.Add(cube);
+            // Check if removal needed
+            if (cube.Mass == 0)
+            {
+                if (cubes.Remove(cube.id))
+                {
+                    if (cube.food) foodCount--;
+                    else playerCount--;
+                }
+                return;
             }
+
+            // Add or update Cube
+            if (cubes.ContainsKey(cube.id))
+                cubes[cube.id] = cube;
+            else cubes.Add(cube.id, cube);
+
+            if (cube.food) foodCount++;
+            else playerCount++;
         }
 
         /// Variables for the properties of the World
