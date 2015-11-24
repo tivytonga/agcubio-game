@@ -62,10 +62,12 @@ namespace AgCubio
             // Add or update Cube
             if (cubes.ContainsKey(cube.id))
                 cubes[cube.id] = cube;
-            else cubes.Add(cube.id, cube);
-
-            if (cube.food) foodCount++;
-            else playerCount++;
+            else
+            {
+                cubes.Add(cube.id, cube);
+                if (cube.food) foodCount++;
+                else playerCount++;
+            }
         }
 
         /// Variables for the properties of the World

@@ -13,6 +13,9 @@ using System.Diagnostics;
 
 namespace View
 {
+    //TODO: Viewport
+    //TODO: Handle players with same names
+    //TODO: Restart after death
     public partial class GameForm : Form
     {
         /// <summary>
@@ -25,7 +28,10 @@ namespace View
         private Timer timer;
         private Font cubeNamesFont;
         private Font infoContainerFont;
-
+        private Rectangle statsRect;
+        private const int STATS_WIDTH = 220;
+        private bool PlayerAlive = false;
+        private string PlayerName;
 
         /// <summary>
         /// Constructor for AgCubio's GUI. Initializes World and Cube.
@@ -37,16 +43,16 @@ namespace View
             InitializeComponent();
             world = new World();
             this.state = state;
-            playerCube = new Cube();
-            playerCube.Name = playerName;
+            PlayerName = playerName;
 
-            Size = new Size(world.Width, world.Height); // todo only want actual game part of display to be that size
+            Size = new Size(world.Width + STATS_WIDTH, world.Height); // todo only want actual game part of display to be that size
+            statsRect = new Rectangle(Size.Width - STATS_WIDTH, 0, STATS_WIDTH, Size.Height);
             cubeNamesFont = new Font("Times New Roman", 14);
             infoContainerFont = new Font("Times New Roman", 11, FontStyle.Bold);
 
             // Send off playerName, wait for data to come back
             state.callback = () => WantMoreData();
-            Network.Send(state, playerName + "\n");
+            Network.Send(state, PlayerName + "\n");
             WantMoreData();
         }
 
@@ -56,10 +62,10 @@ namespace View
         /// need to re-paint.
         /// </summary>
         private void GUIForm_Load(object sender, EventArgs e)
-        { //todo may not need this method
+        {
             timer = new Timer();
             timer.Interval = world.Heartbeats_Per_Second;
-            //timer.Tick += main_Loop;
+            timer.Tick += main_Loop;
             timer.Start();
         }
 
@@ -69,6 +75,7 @@ namespace View
         /// </summary>
         private void Game_Paint(object sender, PaintEventArgs e)
         {
+            // Don't read and write at same time!
             lock (world)
             {
                 foreach (Cube cube in world.getCubes())
@@ -86,7 +93,7 @@ namespace View
                     }
                 }
             }
-            statsBox.Invalidate();
+            Info_Paint(sender, e);
         }
 
         /// <summary>
@@ -97,26 +104,17 @@ namespace View
         {
             // Statistics from World displaying most current data
             string statistics = //"FPS: " + "?" + "\n\n" // TODO: Calculate FPS
-                              "Food: " + world.foodCount + "\n\n"
-                              + "Mass: " + playerCube.Mass + "\n\n"
-                              + "Width: " + playerCube.Width;
-            Rectangle rect1 = new Rectangle(10, 10, 130, 140);
-
-            // Create a StringFormat object and specify format (left-allign)
-            StringFormat stringFormat = new StringFormat();
-            stringFormat.Alignment = StringAlignment.Near;
-            stringFormat.LineAlignment = StringAlignment.Near;
-
+                                "Available Food: " + world.foodCount + "\n\n"
+                              + "Number of Player Cubes: " + world.playerCount + "\n\n";
+            if (PlayerAlive)
+            {
+                statistics +=
+                  "Mass: " +  (int)playerCube.Mass + "\n\n"
+                + "Width: " + playerCube.Width;
+            }
             // Draw the text and the surrounding rectangle.
-            e.Graphics.DrawString(statistics, infoContainerFont, Brushes.Black, rect1, stringFormat);
-        }
-
-        /// <summary>
-        /// Called when the mouse moves within the game view panel.
-        /// </summary>
-        private void Game_MouseMove(object sender, MouseEventArgs e)
-        {
-            Network.Send(state, "(move, " + e.X + ", " + e.Y + ")\n");
+            e.Graphics.FillRectangle(Brushes.FloralWhite, statsRect); // todo
+            e.Graphics.DrawString(statistics, infoContainerFont, Brushes.Black, statsRect);
         }
 
         /// <summary>
@@ -124,9 +122,8 @@ namespace View
         /// </summary>
         private void main_Loop(object sender, EventArgs e)
         {
-            //if (INGAME)
-                //panel1.Visible = false;
-            //splitContainer1.Refresh();
+            Network.Send(state, "(move, " + MousePosition.X + ", " + MousePosition.Y + ")\n");
+            Invalidate();
         }
 
         /// <summary>
@@ -142,18 +139,26 @@ namespace View
                 {
                     Cube cube = JsonConvert.DeserializeObject<Cube>(datum);
                     world.AddCube(cube);
-                    if (cube.Name == playerCube.Name)
+                    if (!PlayerAlive)
+                    {
+                        if (cube.Name == PlayerName)
+                        {
+                            playerCube = cube;
+                            PlayerAlive = true;
+                        }
+                    }
+                    if (cube.id == playerCube.id)
                     {
                         playerCube = cube;
                         if (playerCube.Mass == 0)
                         {
+                            PlayerAlive = false;
                             MessageBox.Show("You have died!");
                         }
                     }
                 }
             }
             Network.i_want_more_data(state);
-            Invalidate();
         }
 
         /// <summary>
@@ -161,7 +166,6 @@ namespace View
         /// </summary>
         private void gameKeyDown(object sender, KeyEventArgs e)
         {
-            //todo method not being called........ fix this
             if (e.KeyData == Keys.Space)
             {
                 Network.Send(state, "(split, " + playerCube.xCoord + ", " + playerCube.yCoord + ")\n");
