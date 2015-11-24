@@ -13,19 +13,18 @@ using System.Diagnostics;
 
 namespace View
 {
-    public partial class GUIForm : Form
+    public partial class GameForm : Form
     {
         /// <summary>
         /// World is used to set all the properties of the Form.
         /// Cube is used to set all the properties of the player's cube.
         /// </summary>
-        World world;
-        Cube playerCube;
-        PreservedState state;
-        Timer timer;
-        Font cubeNamesFont;
-        Font infoContainerFont;
-        bool INGAME; // whether or not the game part itself has started
+        private World world;
+        private Cube playerCube;
+        private PreservedState state;
+        private Timer timer;
+        private Font cubeNamesFont;
+        private Font infoContainerFont;
 
 
         /// <summary>
@@ -33,20 +32,22 @@ namespace View
         /// DoubleBuffered is set to true to avoid flickering.
         /// The size of the Window is set to World's default.
         /// </summary>
-        public GUIForm()
+        public GameForm(PreservedState state, string playerName)
         {
             InitializeComponent();
             world = new World();
+            this.state = state;
             playerCube = new Cube();
-            // todo need to apply DoubleBuffered = true to panel1
+            playerCube.Name = playerName;
 
             Size = new Size(world.Width, world.Height); // todo only want actual game part of display to be that size
-            INGAME = false;
             cubeNamesFont = new Font("Times New Roman", 14);
             infoContainerFont = new Font("Times New Roman", 11, FontStyle.Bold);
-            
-            KeyDown += gameKeyDown;
-            splitContainer1.KeyDown += gameKeyDown;
+
+            // Send off playerName, wait for data to come back
+            state.callback = () => WantMoreData();
+            Network.Send(state, playerName + "\n");
+            WantMoreData();
         }
 
         /// <summary>
@@ -55,10 +56,10 @@ namespace View
         /// need to re-paint.
         /// </summary>
         private void GUIForm_Load(object sender, EventArgs e)
-        {
+        { //todo may not need this method
             timer = new Timer();
             timer.Interval = world.Heartbeats_Per_Second;
-            timer.Tick += main_Loop;
+            //timer.Tick += main_Loop;
             timer.Start();
         }
 
@@ -66,40 +67,38 @@ namespace View
         /// This container displays the field of play. Food and players' cubes are in this container
         /// performing various allowed activities: moving, moving over food, and moving over smaller cubes.
         /// </summary>
-        private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
+        private void Game_Paint(object sender, PaintEventArgs e)
         {
-            if (INGAME)
+            lock (world)
             {
-                lock (world)
+                foreach (Cube cube in world.getCubes())
                 {
-                    foreach (Cube cube in world.Cubes())
+                    // Settings for the Rectangle and Brush
+                    Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
+                    SolidBrush brush = new SolidBrush(cube.color);
+
+                    // Draw cube
+                    e.Graphics.FillRectangle(brush, rect);
+
+                    if (!cube.food)
                     {
-                        // Settings for the Rectangle and Brush
-                        Rectangle rect = new Rectangle(cube.xCoord, cube.yCoord, cube.Width, cube.Width);
-                        SolidBrush brush = new SolidBrush(cube.color);
-
-                        // Draw cube
-                        e.Graphics.FillRectangle(brush, rect);
-
-                        if (!cube.food)
-                        {
-                            e.Graphics.DrawString(cube.Name, cubeNamesFont, Brushes.Yellow, cube.xCoord, cube.yCoord);
-                        }
+                        e.Graphics.DrawString(cube.Name, cubeNamesFont, Brushes.Yellow, cube.xCoord, cube.yCoord);
                     }
                 }
             }
+            statsBox.Invalidate();
         }
 
         /// <summary>
         /// This container displays the current data of the game:
         /// Frames Per Second, Amount of food on the screen, Cube mass, Width of the screen
         /// </summary>
-        private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
+        private void Info_Paint(object sender, PaintEventArgs e)
         {
             // Statistics from World displaying most current data
             string statistics = //"FPS: " + "?" + "\n\n" // TODO: Calculate FPS
-                              //+ "Food: " + "?" + "\n\n" // TODO: Calculate # of food on the screen
-                              "Mass: " + playerCube.Mass + "\n\n"
+                              "Food: " + world.foodCount + "\n\n"
+                              + "Mass: " + playerCube.Mass + "\n\n"
                               + "Width: " + playerCube.Width;
             Rectangle rect1 = new Rectangle(10, 10, 130, 140);
 
@@ -115,42 +114,9 @@ namespace View
         /// <summary>
         /// Called when the mouse moves within the game view panel.
         /// </summary>
-        private void splitContainer1_Panel1_MouseMove(object sender, MouseEventArgs e)
+        private void Game_MouseMove(object sender, MouseEventArgs e)
         {
-            if (INGAME)
-                Network.Send(state, "(move, " + e.X + ", " + e.Y + ")\n");
-        }
-
-        /// <summary>
-        /// This panel lies on top of the game view panel. This panel displays two textboxes:
-        /// Player Name textbox allows player to enter a name for their cube. 
-        /// Server allows player to enter the server to use for the gameplay.
-        /// After the player enters a Player Name and Server, this panel disappears and reveals
-        /// the game view panel.
-        /// </summary>
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-            panel1.Size = new Size(world.Width, world.Height);
-        }
-
-        /// <summary>
-        /// Called when the 'Enter' key has been pressed after text has been
-        /// typed in the Player Name textbox.
-        /// </summary>
-        private void textBox1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                /// Player entered data for Player Name and Server
-                if (!PlayerNameTextBox.Text.Equals("") && !ServerTextBox.Text.Equals("")) // TODO: Check to make sure Server textbox has valid input
-                {
-                    playerCube.Name = PlayerNameTextBox.Text;
-                    
-                    state = Network.Connect_to_Server(() => InitialConnection(), ServerTextBox.Text);
-                }
-
-                // TODO: Take user's input and do something with it
-            }
+            Network.Send(state, "(move, " + e.X + ", " + e.Y + ")\n");
         }
 
         /// <summary>
@@ -158,25 +124,9 @@ namespace View
         /// </summary>
         private void main_Loop(object sender, EventArgs e)
         {
-            if (INGAME)
-                panel1.Visible = false;
-            splitContainer1.Refresh();
-        }
-
-        /// <summary>
-        /// Called when first connected to the server. Sends off cube name, and waits
-        /// for server to return data about it.
-        /// </summary>
-        private void InitialConnection()
-        {
-            if (!state.socket.Connected)
-            {
-                MessageBox.Show("Error: not connected to server.");
-                return;
-            }
-            state.callback = () => WantMoreData();
-            Network.Send(state, playerCube.Name+"\n");
-            WantMoreData();
+            //if (INGAME)
+                //panel1.Visible = false;
+            //splitContainer1.Refresh();
         }
 
         /// <summary>
@@ -185,12 +135,9 @@ namespace View
         /// </summary>
         private void WantMoreData()
         {
-            INGAME = true;
-            // Must avoid adding to world while reading through cubes, for example
-            
+            // Must avoid adding to world while reading through cubes, for example   
             lock (world)
             {
-                world.Cubes.Clear();
                 foreach (string datum in state.getLines())
                 {
                     Cube cube = JsonConvert.DeserializeObject<Cube>(datum);
@@ -206,6 +153,7 @@ namespace View
                 }
             }
             Network.i_want_more_data(state);
+            Invalidate();
         }
 
         /// <summary>
@@ -216,8 +164,7 @@ namespace View
             //todo method not being called........ fix this
             if (e.KeyData == Keys.Space)
             {
-                if (INGAME)
-                    Network.Send(state, "(split, " + playerCube.xCoord + ", " + playerCube.yCoord + ")\n");
+                Network.Send(state, "(split, " + playerCube.xCoord + ", " + playerCube.yCoord + ")\n");
             }
         }
     }

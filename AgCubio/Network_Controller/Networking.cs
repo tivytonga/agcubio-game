@@ -114,6 +114,9 @@ namespace AgCubio
         }
     }
 
+    /// <summary>
+    /// Class for handling server communication on port 11000.
+    /// </summary>
     public static class Network
     {
         public const int DEFAULT_PORT = 11000;
@@ -192,8 +195,6 @@ namespace AgCubio
         /// </summary>
         public static void Send(PreservedState state, string data)
         {
-            //byte[] outgoing = encoding.GetBytes(data);
-            
             lock (sendSync)
             {
                 state.outgoingString += data;

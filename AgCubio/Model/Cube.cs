@@ -85,7 +85,7 @@ namespace AgCubio
         public Cube()
         {
             // TODO: Set defaults of the cube
-            Mass = 200;
+            Mass = 0;
             xCoord = 0;
             yCoord = 0;
             id = 0;

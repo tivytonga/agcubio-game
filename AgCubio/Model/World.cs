@@ -17,8 +17,8 @@ namespace AgCubio
         /// </summary>
         private Dictionary<long, Cube> cubes = new Dictionary<long, Cube>();
 
-        public long foodCount = 0;
-        public long playerCount = 0;
+        public long foodCount { get; private set; }
+        public long playerCount { get; private set; }
 
         /// <summary>
         /// Creates a World with presets: width of 1000, height of 500, 
@@ -29,14 +29,16 @@ namespace AgCubio
             Width = 1000;
             Height = 500;
             Heartbeats_Per_Second = 25;
+            foodCount = 0;
+            playerCount = 0;
         }
 
         /// <summary>
         /// Returns all the cubes in the world, mapping id to Cube object.
         /// </summary>
-        public Dictionary<long, Cube> getCubes()
+        public IEnumerable<Cube> getCubes()
         {
-            return cubes;
+            return cubes.Values;
         }
 
         /// <summary>
